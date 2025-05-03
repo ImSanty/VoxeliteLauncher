@@ -3,7 +3,7 @@
 
 body {
     background-color: var(--background);
-    font-family: "Poppins";
+    font-family: "Minecraft";
     letter-spacing: 0px;
 }
 
@@ -36,7 +36,7 @@ img {
     top: 289px;
     left: 0px;
     width: 400px;
-    font: normal normal bold 19px/29px Poppins;
+    font: normal normal bold 19px/29px Minecraft;
     text-align: center;
     letter-spacing: 0px;
     transition: opacity 1.5s;
@@ -55,13 +55,13 @@ img {
     width: 400px;
     text-align: center;
     transition: opacity 1.5s;
-    font: normal normal normal 9px/13px Poppins;
+    font: normal normal normal 9px/13px Minecraft;
     color: var(--color);
     opacity: 0;
 }
 
 .splash-author .author {
-    font: normal normal bold 9px/13px Poppins;
+    font: normal normal bold 9px/13px Minecraft;
 }
 
 .splash-author.opacity {
@@ -75,7 +75,7 @@ img {
     width: 400px;
     text-align: center;
     transition: opacity 1.5s;
-    font: normal normal bold 18px/27px Poppins;
+    font: normal normal bold 18px/27px Minecraft;
     color: var(--color);
     opacity: 0;
 }
@@ -85,7 +85,7 @@ img {
     left: 25%;
     margin-top: 20px;
     width: 200px;
-    font: normal normal bold 22px / 45px Poppins;
+    font: normal normal bold 22px / 45px Minecraft;
     color: var(--color);
     border: 2px solid var(--color);
     border-radius: 15px;
