@@ -11,7 +11,7 @@
 ![GitHub Repo stars](https://img.shields.io/github/stars/ImSanty/VoxeliteLauncher?style=for-the-badge)
 
 <p align="center">
-    <a href="http://discord.luuxis.fr">
+    <a href="[http://discord.luuxis.fr](https://discord.gg/xXGBX7eG)">
         <img src="https://invidget.switchblade.xyz/e9q7Yr2cuQ">
     </a>
 </p>
