@@ -225,7 +225,7 @@
 }
 
 .player-head {
-    background: url('../../images/default/setve.png'), no-repeat;
+    background: url('../../images/default/steve.png'), no-repeat;
     background-size: cover;
     image-rendering: pixelated;
     transition: var(--transition);
