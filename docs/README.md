@@ -10,12 +10,6 @@
 ![GitHub forks](https://img.shields.io/github/forks/ImSanty/VoxeliteLauncher?style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/ImSanty/VoxeliteLauncher?style=for-the-badge)
 
-<p align="center">
-    <a href="[http://discord.luuxis.fr](https://discord.gg/xXGBX7eG)">
-        <img src="https://invidget.switchblade.xyz/e9q7Yr2cuQ">
-    </a>
-</p>
-
 ---
 ### **<ins><p align="center">Conditions d'utilisation:</p>**
 - Pour utiliser le code vous devez faire un fork du projet.
