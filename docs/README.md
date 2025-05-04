@@ -4,7 +4,6 @@
 
 [<p align="center">]()
 ![GitHub all releases](https://img.shields.io/github/downloads/ImSanty/VoxeliteLauncher/total?style=for-the-badge)
-![Discord](https://img.shields.io/discord/842222545121050628?style=for-the-badge)
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/ImSanty/VoxeliteLauncher/dev?style=for-the-badge)
 [<p align="center">]()
 ![GitHub forks](https://img.shields.io/github/forks/ImSanty/VoxeliteLauncher?style=for-the-badge)
