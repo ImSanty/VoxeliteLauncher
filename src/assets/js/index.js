@@ -32,8 +32,8 @@ class Splash {
 
   async startAnimation() {
     let splashes = [
-      { message: 'Bienvenido a Voxelite launcher!', author: 'SantiAgüero' },
-      { message: 'Desarrollado por', author: 'SantiAgüero :)' }
+      { message: 'Bienvenido a Voxelite launcher!', author: 'SantiAguero' },
+      { message: 'Desarrollado por', author: 'SantiAguero :)' }
     ];
     let splash = splashes[Math.floor(Math.random() * splashes.length)];
     this.splashMessage.textContent = splash.message;
