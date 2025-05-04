@@ -10,44 +10,37 @@
 ![GitHub forks](https://img.shields.io/github/forks/ImSanty/VoxeliteLauncher?style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/ImSanty/VoxeliteLauncher?style=for-the-badge)
 
----
-### **<ins><p align="center">Conditions d'utilisation:</p>**
-- Pour utiliser le code vous devez faire un fork du projet.
-- Pour utiliser le code votre code doit tout le temps être public.
-- Pour utiliser le code toute mention originale de la licence doit être gardé.
-- Pour utiliser le code vous devez garder la licence originale.
----
 
-### **<ins><p align="center">Fonctionnalitées du launcher :</p>**
+### **<ins><p align="center">Launcher features:</p>**
 
-- ✅ Mise à jour automatiques via github.
+- ✅ Automatic updates through github.
 
-- 🔴 Option pour mettre le launcher en maintenance.
+- 🔴 Option to put launcher in maintenance mode.
 
-- 🔒 Authentification Microsoft.
+- 🔒 Microsoft Authentification.
 
-- ⛏️ Supporte toutes versions de Minecraft 1.0 > latest.
+- ⛏️ Supports all versions of Minecraft 1.0 > latest.
 
-- 📦 Supporte les version moddées Forge, NeoForge, LegacyFabric, FabricMC et Quilt
+- 📦 Supports Forge, NeoForge, LegacyFabric, FabricTM and Quilt modded versions.
 
-- 📰 Fil d'actualité intégré nativement au launcher.
+- 📰 News feed natively integrated into launcher.
 
-- ⚙️ Gestion intuitive des paramètres, y compris un panneau de configuration Java.
+- ⚙️ Intuitive parameter management, including a Java control panel.
 
-- 🟢 Statut serveur complet.
+- 🟢 Full server status.
 
-    - Opérationnel ou hors ligne.
+    - Online or offline.
     
-    - Nombres de joueurs connectés.
+    - Number of connected players.
 
-- ☕ Installation de Java automatique.
+- ☕ Automatic Java installation.
 
-    - Si vous avez installé une version incompatible de Java, nous installerons la bonne pour vous.
+    - If you have installed an incompatible version of Java, we will install the correct one for you.
     
-    - Vous n'avez pas besoin d'avoir Java installé pour exécuter le launcher.
+    - You don't need to have Java installed to run the launcher.
 
-Ce n'est pas une liste exhaustive. Installez le launcher pour voir tout ce qu'il peut faire !
+This is not an exhaustive list. Install the launcher to see all it can do!
 
-Vous aimez le projet ? Laissez une étoile ⭐ sur le repo !
+Do you like the project? Leave a star ⭐ on the repo!
 
 ---
