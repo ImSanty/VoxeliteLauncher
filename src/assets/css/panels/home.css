@@ -14,17 +14,20 @@
 .status-server {
     position: relative;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: var(--background-transparent);
-    width: 10rem;
+    width: 20rem;
     height: 4rem;
     color: var(--color);
     border-radius: 10px;
-    margin-top: 3rem;
+    margin-top: 4rem;
     padding: 1rem;
+    text-align: center;
 }
 
 .server-status-icon {
-    height: 3.3rem;
+    height: 3.5rem;
     
 }
 
@@ -51,7 +54,7 @@
 
 .player-count {
     font-size: 1.5rem;
-    margin: 0.4rem 0.5rem;
+    margin: 0.6rem 0.5rem;
 }
 
 .status-player-count:after {
@@ -59,8 +62,8 @@
     content: '';
     width: 10px;
     height: 10px;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 8px;
     border-radius: 15px;
     border: solid 5px var(--background);
     background: #1AC707;
