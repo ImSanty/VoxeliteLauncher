@@ -80,7 +80,7 @@ async function addAccount(data) {
           skin ? 'style="background-image: url(' + skin + ');"' : ''
         }></div>
         <div class="profile-infos">
-            <div class="profile-pseudo">${data.name}</div>
+            <div class="profile-name">${data.name}</div>
             <div class="profile-uuid">${data.uuid}</div>
         </div>
         <div class="delete-profile" id="${data.ID}">
@@ -97,11 +97,15 @@ async function accountSelect(data) {
   if (activeAccount) activeAccount.classList.toggle('account-select');
   account.classList.add('account-select');
   if (data?.profile?.skins[0]?.base64) headplayer(data.profile.skins[0].base64);
+
+  document.querySelector('.player-head-name').textContent = data.name;
 }
 
 async function headplayer(skinBase64) {
   let skin = await new skin2D().creatHeadTexture(skinBase64);
-  document.querySelector('.player-head').style.backgroundImage = `url(${skin})`;
+  document.querySelector(
+    '.player-head-image'
+  ).style.backgroundImage = `url(${skin})`;
 }
 
 async function setStatus(opt) {
