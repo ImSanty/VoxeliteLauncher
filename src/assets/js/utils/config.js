@@ -32,7 +32,7 @@ class Config {
   }
 
   async getInstanceList() {
-    let urlInstance = `${url}/files`;
+    let urlInstance = `${url}/launcher/files`;
     let instances = await nodeFetch(urlInstance)
       .then((res) => res.json())
       .catch((err) => err);
