@@ -9,7 +9,7 @@ body {
     padding: 0;
     user-select: none;
     color: var(--color);
-    font-family: 'Minecraft';
+    font-family: 'HelveticaNeue';
     font-weight: bolder;
 }
 
@@ -157,8 +157,8 @@ input::-webkit-inner-spin-button {
 
 .popup-title {
     text-align: center;
-    font-size: 2rem;
-    border-bottom: solid 4px var(--color);
+    font-size: 1.3rem;
+    border-bottom: solid 2px var(--color);
     margin-bottom: 1rem;
 }
 
