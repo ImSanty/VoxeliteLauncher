@@ -11,7 +11,7 @@
  *                                                                             *
  ******************************************************************************/
 
-.status-server {
+ .status-server {
     position: relative;
     display: flex;
     justify-content: space-between;
@@ -228,15 +228,31 @@
 }
 
 .player-head {
-    background: url('../../images/default/steve.png'), no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    pointer-events: none;
+}
+
+.player-head-image {
+    background: url('../../images/default/steve.png') no-repeat center;
     background-size: cover;
     image-rendering: pixelated;
-    transition: var(--transition);
     height: 3rem;
     width: 3rem;
-    pointer-events: none;
-    border-radius: 15px;
+    border-radius: 10px;
+    flex-shrink: 0;
 }
+
+.player-head-name {
+    font-size: 1rem;
+    color: var(--color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 .player-menu {
     color: var(--element-color);
@@ -283,7 +299,7 @@
     color: var(--color);
     font-size: 1rem;
     height: calc(100% - 0px);
-    border: solid 3px var(--color);
+    border: solid 3px var(--element-color);
     text-align: center;
     border-radius: 8px;
     padding: 0 0.8rem;
