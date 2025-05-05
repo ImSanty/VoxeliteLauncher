@@ -22,19 +22,20 @@
 }
 
 .login-text {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .connect,
 .cancel {
-    background: none;
+    background: var(--element-color);
     color: var(--color);
-    border: solid 4px var(--element-color);
+    border: solid 2px var(--element-color);
     border-radius: 10px;
     padding: 0.3rem 4rem;
     font-size: inherit;
     font-weight: bold;
     margin: 15px 10px;
+    cursor: hand;
 }
 
 .input-login .email,
@@ -42,8 +43,8 @@
 .A2F {
     color: var(--color);
     background: none;
-    border: solid 2px var(--element-color);
-    border-radius: 30px;
+    border: solid 3px var(--element-color);
+    border-radius: 10px;
     width: 50%;
     padding: 0.4rem 1rem;
     margin-top: 10px;
