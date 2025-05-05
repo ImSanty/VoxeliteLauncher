@@ -5,7 +5,7 @@
   "description": "Voxelite minecraft launcher",
   "main": "src/app.js",
   "author": {
-    "name": "ImSanty, Inc.",
+    "name": "ImSanty",
     "email": "santiaguero936@gmail.com",
     "url": "https://github.com/ImSanty"
   },
