@@ -11,23 +11,24 @@
  *                                                                             *
  ******************************************************************************/
 
-.status-server {
+ .status-server {
     position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--background);
-    width: 25rem;
-    height: 3rem;
+    background: var(--background-transparent);
+    width: 20rem;
+    height: 4rem;
     color: var(--color);
     border-radius: 10px;
-    margin-top: 3rem;
+    margin-top: 4rem;
     padding: 1rem;
     text-align: center;
 }
 
 .server-status-icon {
-    height: 3.3rem;
+    height: 3.5rem;
+    
 }
 
 .server-status-name {
@@ -53,7 +54,7 @@
 
 .player-count {
     font-size: 1.5rem;
-    margin: 0.4rem 0.5rem;
+    margin: 0.6rem 0.5rem;
 }
 
 .status-player-count:after {
@@ -61,8 +62,8 @@
     content: '';
     width: 10px;
     height: 10px;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 8px;
     border-radius: 15px;
     border: solid 5px var(--background);
     background: #1AC707;
@@ -85,25 +86,26 @@
  *                                                                             *
  ******************************************************************************/
 
-.new-tab {
+ .new-tab {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: right;
+    margin-left: 2rem;
     width: 85%;
     height: 100%;
 }
 
 .titre-tab-new {
-    margin-top: 1rem;
-    font-size: 2rem;
+    margin-top: 2rem;
+    font-size: 1.4rem;
     padding: 0.5rem 1rem;
-    border-radius: 2rem;
+    border-radius: 10px;
     background: var(--background-transparent);
     color: var(--color);
 }
 
 .news-list {
-    width: 90%;
+    width: 100%;
     height: 100%;
     border-radius: 10px;
     margin: 1rem 0;
@@ -166,14 +168,13 @@
  ******************************************************************************/
 
 .social-tab {
-    position: absolute;
+    position: relative;
     display: flex;
-    bottom: 0;
+    padding-top: 2rem;
     right: 0;
-    width: 15%;
-    height: calc(80% - 1rem);
+    width: 13%;
+    height: calc(80% - 0.1rem);
     justify-content: center;
-    margin-bottom: 1rem;
 }
 
 .social-list {
@@ -227,15 +228,31 @@
 }
 
 .player-head {
-    background: url('../../images/default/setve.png'), no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    pointer-events: none;
+}
+
+.player-head-image {
+    background: url('../../images/default/steve.png') no-repeat center;
     background-size: cover;
     image-rendering: pixelated;
-    transition: var(--transition);
     height: 3rem;
     width: 3rem;
-    pointer-events: none;
-    border-radius: 15px;
+    border-radius: 10px;
+    flex-shrink: 0;
 }
+
+.player-head-name {
+    font-size: 1rem;
+    color: var(--color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 
 .player-menu {
     color: var(--element-color);
@@ -255,9 +272,11 @@
     align-items: center;
     position: relative;
     border: solid 3px var(--element-color);
-    border-radius: 15px;
+    background: var(--element-color);
+    border-radius: 10px;
     height: 3.2rem;
-    padding-right: 1.9rem;
+    padding-right: 2rem;
+    cursor: hand;
 }
 
 .play-btn {
@@ -276,15 +295,15 @@
     align-items: center;
     position: absolute;
     right: -3;
-    top: -2;
-    color: var(--element-color);
+    top: -3;
+    color: var(--color);
     font-size: 1rem;
-    height: calc(100% - 1px);
+    height: calc(100% - 0px);
     border: solid 3px var(--element-color);
     text-align: center;
-    border-radius: 15px;
-    padding: 0 0.5rem;
-    cursor: pointer;
+    border-radius: 8px;
+    padding: 0 0.8rem;
+    cursor: grab;
 }
 
 .instance-select:before {
@@ -320,6 +339,7 @@
     font-size: 3rem;
     color: var(--element-color);
     margin: 0 1.5rem;
+    cursor: pointer;
 }
 
 .instance-popup {
@@ -356,15 +376,15 @@
 }
 
 .instances-tab p {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     font-size: 2rem;
 }
 
 .instance-elements {
     background: var(--background-element);
     text-align: center;
-    border-radius: 10px;
-    margin: 0.5rem 0;
+    border-radius: 5px;
+    margin: 1rem 5;
     font-size: 1.5rem;
     cursor: pointer;
 }

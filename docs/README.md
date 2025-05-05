@@ -1,80 +1,45 @@
 <p align="center"><img src="../src/assets/images/icon.png" alt="icon-launcher"></p>
 
-<h1 align="center">CraftLaunch</h1>
+<h1 align="center">VoxeliteLauncher</h1>
 
 [<p align="center">]()
-![GitHub all releases](https://img.shields.io/github/downloads/luuxis/Selvania-Launcher/total?style=for-the-badge)
-![Discord](https://img.shields.io/discord/819729377650278420?style=for-the-badge)
-![GitHub package.json version](https://img.shields.io/github/package-json/v/luuxis/Selvania-Launcher?style=for-the-badge)
+![GitHub all releases](https://img.shields.io/github/downloads/ImSanty/VoxeliteLauncher/total?style=for-the-badge)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/ImSanty/VoxeliteLauncher/dev?style=for-the-badge)
 [<p align="center">]()
-![GitHub forks](https://img.shields.io/github/forks/luuxis/Selvania-Launcher?style=for-the-badge)
-![GitHub Repo stars](https://img.shields.io/github/stars/luuxis/Selvania-Launcher?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/ImSanty/VoxeliteLauncher?style=for-the-badge)
+![GitHub Repo stars](https://img.shields.io/github/stars/ImSanty/VoxeliteLauncher?style=for-the-badge)
 
-<p align="center">
-    <a href="http://discord.luuxis.fr">
-        <img src="https://invidget.switchblade.xyz/e9q7Yr2cuQ">
-    </a>
-</p>
 
----
-### **<ins><p align="center">Conditions d'utilisation:</p>**
-- Pour utiliser le code vous devez faire un fork du projet.
-- Pour utiliser le code votre code doit tout le temps être public.
-- Pour utiliser le code toute mention originale de la licence doit être gardé.
-- Pour utiliser le code vous devez garder la licence originale.
----
+### **<ins><p align="center">Launcher features:</p>**
 
-### **<ins><p align="center">Fonctionnalitées du launcher :</p>**
+- ✅ Automatic updates through github.
 
-- ✅ Mise à jour automatiques via github.
+- 🔴 Option to put launcher in maintenance mode.
 
-- 🔴 Option pour mettre le launcher en maintenance.
+- 🔒 Microsoft Authentification.
 
-- 🔒 Authentification Microsoft.
+- ⛏️ Supports all versions of Minecraft 1.0 > latest.
 
-- ⛏️ Supporte toutes versions de Minecraft 1.0 > latest.
+- 📦 Supports Forge, NeoForge, LegacyFabric, FabricTM and Quilt modded versions.
 
-- 📦 Supporte les version moddées Forge, NeoForge, LegacyFabric, FabricMC et Quilt
+- 📰 News feed natively integrated into launcher.
 
-- 📰 Fil d'actualité intégré nativement au launcher.
+- ⚙️ Intuitive parameter management, including a Java control panel.
 
-- ⚙️ Gestion intuitive des paramètres, y compris un panneau de configuration Java.
+- 🟢 Full server status.
 
-- 🟢 Statut serveur complet.
-
-    - Opérationnel ou hors ligne.
+    - Online or offline.
     
-    - Nombres de joueurs connectés.
+    - Number of connected players.
 
-- ☕ Installation de Java automatique.
+- ☕ Automatic Java installation.
 
-    - Si vous avez installé une version incompatible de Java, nous installerons la bonne pour vous.
+    - If you have installed an incompatible version of Java, we will install the correct one for you.
     
-    - Vous n'avez pas besoin d'avoir Java installé pour exécuter le launcher.
+    - You don't need to have Java installed to run the launcher.
 
-Ce n'est pas une liste exhaustive. Installez le launcher pour voir tout ce qu'il peut faire !
+This is not an exhaustive list. Install the launcher to see all it can do!
 
-Vous aimez le projet ? Laissez une étoile ⭐ sur le repo !
-
----
-
-### **<ins><p align="center">Téléchargement :</p>**
-
-Vous pouvez télécharger le launcher à partir des [Releases GitHub](../../../releases).
-
-Plateformes supportées :
-
-- Windows 
-- Linux
-- MacOS
-
-Si vous téléchargez à partir des Releases, sélectionnez le programme d'installation de votre système.
-
- Plateforme | Fichier |
-| -------- | ---- |
-| Windows x64 | `Selvania-Launcher-win-x64.exe ` |
-| macOS x64 | `Selvania-Launcher-mac-x64.dmg` |
-| macOS arm64 | `Selvania-Launcher-mac-arm64.dmg` |
-| Linux x64 | `Selvania-Launcher-linux-x86_64.AppImage` |
+Do you like the project? Leave a star ⭐ on the repo!
 
 ---
