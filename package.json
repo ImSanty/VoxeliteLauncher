@@ -1,6 +1,6 @@
 {
   "name": "voxelite-launcher",
-  "preductname": "Voxelite Launcher",
+  "productname": "Voxelite Launcher",
   "version": "1.0.0",
   "description": "Voxelite minecraft launcher",
   "main": "src/app.js",
