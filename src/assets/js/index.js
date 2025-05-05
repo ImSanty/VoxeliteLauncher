@@ -32,8 +32,8 @@ class Splash {
 
   async startAnimation() {
     let splashes = [
-      { message: 'Bienvenido a Voxelite launcher!', author: 'SantiAguero' },
-      { message: 'Desarrollado por', author: 'SantiAguero :)' }
+      { message: 'Bienvenido a Voxelite launcher!', author: 'SantiAgüero' },
+      { message: 'Desarrollado por', author: 'SantiAgüero :)' }
     ];
     let splash = splashes[Math.floor(Math.random() * splashes.length)];
     this.splashMessage.textContent = splash.message;
@@ -58,8 +58,9 @@ class Splash {
       .invoke('update-app')
       .then()
       .catch((err) => {
+        const errorMessage = (err && err.message) || JSON.stringify(err);
         return this.shutdown(
-          `Error al buscar actualizaciones:<br>${err.message}`
+          `Error al buscar actualizaciones:<br>${errorMessage}`
         );
       });
 
