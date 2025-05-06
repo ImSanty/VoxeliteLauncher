@@ -142,7 +142,7 @@ async function setStatus(opt) {
     document.querySelector('.status-player-count').classList.add('red');
     playersOnline.innerHTML = '0';
   }
-  setTimeout(() => setStatus(opt), 5000);
+  setTimeout(() => setStatus(opt), 2500);
 }
 
 export {
