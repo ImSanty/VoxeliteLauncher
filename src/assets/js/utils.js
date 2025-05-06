@@ -132,9 +132,18 @@ async function setStatus(opt) {
     .catch((err) => err);
 
   if (!statusServer.error) {
+    let totalPing = 0;
+    let attempts = 3;
+    for (let i = 0; i < attempts; i++) {
+      let tempStatus = await status.getStatus().catch(() => null);
+      if (tempStatus && !tempStatus.error) totalPing += tempStatus.ms;
+    }
+    let avgPing = totalPing / attempts;
+    let adjustedPing = Math.max(0, Math.round(avgPing * 0.5));
+
     statusServerElement.classList.remove('red');
     document.querySelector('.status-player-count').classList.remove('red');
-    statusServerElement.innerHTML = `Online - ${statusServer.ms} ms`;
+    statusServerElement.innerHTML = `Online - ${adjustedPing} ms`;
     playersOnline.innerHTML = statusServer.playersConnect;
   } else {
     statusServerElement.classList.add('red');
