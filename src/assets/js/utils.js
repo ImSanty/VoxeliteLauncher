@@ -139,7 +139,7 @@ async function setStatus(opt) {
       if (tempStatus && !tempStatus.error) totalPing += tempStatus.ms;
     }
     let avgPing = totalPing / attempts;
-    let adjustedPing = Math.max(0, Math.round(avgPing * 0.5));
+    let adjustedPing = Math.max(0, Math.round(avgPing * 0.25));
 
     statusServerElement.classList.remove('red');
     document.querySelector('.status-player-count').classList.remove('red');
