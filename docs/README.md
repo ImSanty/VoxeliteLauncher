@@ -4,7 +4,7 @@
 
 [<p align="center">]()
 ![GitHub all releases](https://img.shields.io/github/downloads/ImSanty/VoxeliteLauncher/total?style=for-the-badge)
-![GitHub package.json version](https://img.shields.io/github/blob/dev/package-json/v/ImSanty/VoxeliteLauncher?style=for-the-badge)
+![GitHub package.json version](https://img.shields.io/github/dev/package-json/v/ImSanty/VoxeliteLauncher?style=for-the-badge)
 [<p align="center">]()
 ![GitHub forks](https://img.shields.io/github/forks/ImSanty/VoxeliteLauncher?style=for-the-badge)
 ![GitHub Repo stars](https://img.shields.io/github/stars/ImSanty/VoxeliteLauncher?style=for-the-badge)
