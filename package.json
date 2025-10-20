@@ -9,7 +9,7 @@
     "email": "santiaguero936@gmail.com",
     "url": "https://github.com/ImSanty"
   },
-  "url": "https://imsanty.dev/",
+  "url": "https://imsanty.com/",
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "electron-updater": "^6.1.8",
-    "minecraft-java-core": "^4.1.1",
+    "minecraft-java-core": "^4.1.4",
     "node-bdd": "^2.0.4",
     "node-fetch": "^2.7.0",
     "xml-js": "^1.6.11"
