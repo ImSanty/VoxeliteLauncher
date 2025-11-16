@@ -314,24 +314,56 @@
 
 .info-starting-game {
     display: none;
-    text-align: center;
+    margin-left: 1.5rem;
+    align-items: center;
+}
+
+.progress-bar-container {
+    position: relative;
+    width: 22rem;
+    max-width: 26rem;
 }
 
 .progress-bar {
     appearance: none;
-    height: 10px;
+    width: 100%;
+    height: 26px;
     margin: 0.5rem 0;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 .progress-bar::-webkit-progress-bar {
-    background-color: var(--background);
-    border: solid 1px var(--element-color);
-    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: solid 2px var(--element-color);
+    border-radius: 999px;
 }
 
 .progress-bar::-webkit-progress-value {
-    background-color: var(--element-color);
-    border-radius: 10px;
+    background: linear-gradient(90deg, #1ac707 0%, var(--element-color) 100%);
+    border-radius: 999px;
+}
+
+.progress-bar.progress-bar-active {
+    box-shadow: 0 0 12px rgba(26, 199, 7, 0.35);
+}
+
+.info-starting-game-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    width: calc(100% - 1.5rem);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .settings-btn {

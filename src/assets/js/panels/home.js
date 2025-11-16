@@ -294,7 +294,25 @@ class Home {
 
     playInstanceBTN.style.display = 'none';
     infoStartingBOX.style.display = 'block';
-    progressBar.style.display = '';
+    progressBar.style.display = 'block';
+    progressBar.classList.add('progress-bar-active');
+
+    let lastProgressTick = { time: Date.now(), value: 0 };
+    let lastPercent = 0;
+    let lastSpeedBps = 0;
+    let lastEtaSeconds = null;
+    let currentPhase = 'download';
+
+    const updateLabel = () => {
+      infoStarting.innerHTML = buildDownloadLabel({
+        phase: currentPhase,
+        percent: lastPercent,
+        speedBps: currentPhase === 'download' ? lastSpeedBps : undefined,
+        etaSeconds: currentPhase === 'download' ? lastEtaSeconds : undefined
+      });
+    };
+
+    updateLabel();
     ipcRenderer.send('main-window-progress-load');
 
     launch.on('extract', (extract) => {
@@ -303,32 +321,65 @@ class Home {
     });
 
     launch.on('progress', (progress, size) => {
-      infoStarting.innerHTML = `Descargando ${((progress / size) * 100).toFixed(
-        0
-      )}%`;
+      currentPhase = 'download';
+
+      const percent = size > 0 ? (progress / size) * 100 : 0;
+      const now = Date.now();
+      const deltaBytes = progress - lastProgressTick.value;
+      const deltaTime = (now - lastProgressTick.time) / 1000;
+      let derivedSpeed = lastSpeedBps;
+
+      if (deltaTime > 0.2 && deltaBytes >= 0) {
+        derivedSpeed = deltaBytes / deltaTime;
+      }
+
+      const remainingBytes = size - progress;
+      const derivedEta =
+        derivedSpeed > 0 ? remainingBytes / derivedSpeed : null;
+
+      lastProgressTick = { time: now, value: progress };
+      lastPercent = percent;
+
+      if (Number.isFinite(derivedSpeed) && derivedSpeed > 0) {
+        lastSpeedBps = derivedSpeed;
+      }
+
+      if (Number.isFinite(derivedEta) && derivedEta >= 0) {
+        lastEtaSeconds = derivedEta;
+      }
+
+      updateLabel();
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
       progressBar.max = size;
     });
 
     launch.on('check', (progress, size) => {
-      infoStarting.innerHTML = `Verificando ${((progress / size) * 100).toFixed(
-        0
-      )}%`;
+      currentPhase = 'verify';
+      const percent = size > 0 ? (progress / size) * 100 : 0;
+      lastPercent = percent;
+      updateLabel();
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
       progressBar.max = size;
     });
 
     launch.on('estimated', (time) => {
-      let hours = Math.floor(time / 3600);
-      let minutes = Math.floor((time - hours * 3600) / 60);
-      let seconds = Math.floor(time - hours * 3600 - minutes * 60);
-      console.log(`${hours}h ${minutes}m ${seconds}s`);
+      if (Number.isFinite(time) && time >= 0) {
+        lastEtaSeconds = time;
+        if (currentPhase === 'download') {
+          updateLabel();
+        }
+      }
     });
 
     launch.on('speed', (speed) => {
-      console.log(`${(speed / 1067008).toFixed(2)} Mb/s`);
+      if (Number.isFinite(speed) && speed > 0) {
+        lastSpeedBps = speed;
+        if (currentPhase === 'download') {
+          updateLabel();
+        }
+      }
     });
 
     launch.on('patch', (patch) => {
@@ -339,12 +390,13 @@ class Home {
 
     launch.on('data', (e) => {
       progressBar.style.display = 'none';
+      progressBar.classList.remove('progress-bar-active');
       if (configClient.launcher_config.closeLauncher == 'close-launcher') {
         ipcRenderer.send('main-window-hide');
       }
       new logger('Minecraft', '#36b030');
       ipcRenderer.send('main-window-progress-load');
-      infoStarting.innerHTML = `Inciando...`;
+      infoStarting.innerHTML = `Iniciando...`;
       console.log(e);
     });
 
@@ -355,6 +407,7 @@ class Home {
       ipcRenderer.send('main-window-progress-reset');
       infoStartingBOX.style.display = 'none';
       playInstanceBTN.style.display = 'flex';
+      progressBar.classList.remove('progress-bar-active');
       infoStarting.innerHTML = `Verificando`;
       new logger(pkg.name, '#7289da');
       console.log('Cerrar');
@@ -376,6 +429,7 @@ class Home {
       ipcRenderer.send('main-window-progress-reset');
       infoStartingBOX.style.display = 'none';
       playInstanceBTN.style.display = 'flex';
+      progressBar.classList.remove('progress-bar-active');
       infoStarting.innerHTML = `Verificando`;
       new logger(pkg.name, '#7289da');
       console.log(err);
@@ -404,4 +458,69 @@ class Home {
     return { year: year, month: allMonth[month - 1], day: day };
   }
 }
+
+function buildDownloadLabel({ phase, percent = 0, speedBps, etaSeconds }) {
+  const safePhase = phase === 'verify' ? 'Verificando' : 'Descargando';
+  const boundedPercent = Math.max(0, Math.min(100, percent || 0));
+  const extras = [];
+
+  if (safePhase === 'Descargando') {
+    const speedText = formatSpeed(speedBps);
+    const etaText = formatEta(etaSeconds);
+
+    if (speedText) {
+      extras.push(speedText);
+    }
+
+    if (etaText) {
+      extras.push(etaText);
+    }
+  }
+
+  const suffix = extras.length ? ` · ${extras.join(' · ')}` : '';
+  return `${safePhase} ${boundedPercent.toFixed(0)}%${suffix}`;
+}
+
+function formatSpeed(bytesPerSecond) {
+  if (!Number.isFinite(bytesPerSecond) || bytesPerSecond <= 0) {
+    return null;
+  }
+
+  const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+  let value = bytesPerSecond;
+  let unitIndex = 0;
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+
+  const precision = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+  return `${value.toFixed(precision)} ${units[unitIndex]}`;
+}
+
+function formatEta(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
+
+  const totalSeconds = Math.max(0, Math.floor(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+
+  const parts = [];
+
+  if (hours) {
+    parts.push(`${hours}h`);
+  }
+
+  if (minutes || hours) {
+    parts.push(`${minutes}m`);
+  }
+
+  parts.push(`${secs}s`);
+  return parts.join(' ');
+}
+
 export default Home;
