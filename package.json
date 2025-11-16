@@ -9,7 +9,7 @@
     "email": "santiaguero936@gmail.com",
     "url": "https://github.com/ImSanty"
   },
-  "url": "https://imsanty.com/",
+  "url": "https://api.imsanty.com/v1",
   "scripts": {
     "start": "cross-env-shell NODE_ENV=dev electron .",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
