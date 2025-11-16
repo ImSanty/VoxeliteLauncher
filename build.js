@@ -1,79 +1,59 @@
 const fs = require('fs');
-
+const path = require('path');
 const builder = require('electron-builder');
 const JavaScriptObfuscator = require('javascript-obfuscator');
-const nodeFetch = require('node-fetch');
+const fetch = require('node-fetch');
 const png2icons = require('png2icons');
 const Jimp = require('jimp');
 
 const { preductname } = require('./package.json');
 
-class Index {
-  async init() {
-    this.obf = true;
-    this.Fileslist = [];
-    process.argv.forEach(async (val) => {
-      if (val.startsWith('--icon')) {
-        return this.iconSet(val.split('=')[1]);
-      }
-
-      if (val.startsWith('--obf')) {
-        this.obf = JSON.parse(val.split('=')[1]);
-        this.Fileslist = this.getFiles('src');
-      }
-
-      if (val.startsWith('--build')) {
-        let buildType = val.split('=')[1];
-        if (buildType == 'platform') return await this.buildPlatform();
-      }
-    });
+class BuildPipeline {
+  constructor() {
+    this.shouldObfuscate = true;
+    this.sourceFiles = [];
   }
 
-  async Obfuscate() {
-    if (fs.existsSync('./app')) fs.rmSync('./app', { recursive: true });
+  async init() {
+    const args = process.argv.slice(2);
 
-    for (let path of this.Fileslist) {
-      let fileName = path.split('/').pop();
-      let extFile = fileName.split('.').pop();
-      let folder = path.replace(`/${fileName}`, '').replace('src', 'app');
+    for (let index = 0; index < args.length; index += 1) {
+      const arg = args[index];
 
-      if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
-
-      if (extFile == 'js') {
-        let code = fs.readFileSync(path, 'utf8');
-        code = code.replace(/src\//g, 'app/');
-        if (this.obf) {
-          await new Promise((resolve) => {
-            console.log(`Obfuscate ${path}`);
-            let obf = JavaScriptObfuscator.obfuscate(code, {
-              optionsPreset: 'medium-obfuscation',
-              disableConsoleOutput: false,
-              target: 'node'
-            });
-            resolve(
-              fs.writeFileSync(
-                `${folder}/${fileName}`,
-                obf.getObfuscatedCode(),
-                { encoding: 'utf-8' }
-              )
-            );
-          });
-        } else {
-          console.log(`Copy ${path}`);
-          fs.writeFileSync(`${folder}/${fileName}`, code, {
-            encoding: 'utf-8'
-          });
+      if (arg.startsWith('--icon')) {
+        const url = arg.includes('=') ? arg.split('=')[1] : args[index + 1];
+        if (!url) {
+          throw new Error('Missing value for --icon argument');
         }
-      } else {
-        fs.copyFileSync(path, `${folder}/${fileName}`);
+        await this.setIcons(url);
+        continue;
+      }
+
+      if (arg.startsWith('--obf')) {
+        const value = arg.includes('=') ? arg.split('=')[1] : 'true';
+        this.shouldObfuscate = JSON.parse(value);
+        this.sourceFiles = this.getFiles('src');
+        continue;
+      }
+
+      if (arg.startsWith('--build')) {
+        const value = arg.includes('=') ? arg.split('=')[1] : 'platform';
+        if (value === 'platform') {
+          await this.buildPlatform();
+        }
       }
     }
   }
 
   async buildPlatform() {
-    await this.Obfuscate();
-    builder
-      .build({
+    if (!this.sourceFiles.length) {
+      this.sourceFiles = this.getFiles('src');
+    }
+
+    await this.obfuscateSources();
+
+    try {
+      await builder.build({
         config: {
           generateUpdatesFilesForAllChannels: false,
           appId: preductname,
@@ -131,48 +111,106 @@ class Index {
             ]
           }
         }
-      })
-      .then(() => {
-        console.log('la build finalizó');
-      })
-      .catch((err) => {
-        console.error('Error during build!', err);
       });
+      console.log('Build completed successfully');
+    } catch (error) {
+      console.error('Build failed', error);
+      throw error;
+    }
   }
 
-  getFiles(path, file = []) {
-    if (fs.existsSync(path)) {
-      let files = fs.readdirSync(path);
-      if (files.length == 0) file.push(path);
-      for (let i in files) {
-        let name = `${path}/${files[i]}`;
-        if (fs.statSync(name).isDirectory()) this.getFiles(name, file);
-        else file.push(name);
+  async obfuscateSources() {
+    if (fs.existsSync('./app')) {
+      fs.rmSync('./app', { recursive: true, force: true });
+    }
+
+    for (const filePath of this.sourceFiles) {
+      const fileName = path.basename(filePath);
+      const extension = path.extname(fileName).toLowerCase();
+      const targetFolder = path.dirname(filePath).replace('src', 'app');
+
+      if (!fs.existsSync(targetFolder)) {
+        fs.mkdirSync(targetFolder, { recursive: true });
+      }
+
+      if (extension === '.js') {
+        let code = fs.readFileSync(filePath, 'utf8');
+        code = code.replace(/src\//g, 'app/');
+
+        if (this.shouldObfuscate) {
+          try {
+            console.log(`Obfuscate ${filePath}`);
+            const obfuscated = JavaScriptObfuscator.obfuscate(code, {
+              optionsPreset: 'medium-obfuscation',
+              disableConsoleOutput: false,
+              target: 'node'
+            });
+            fs.writeFileSync(
+              path.join(targetFolder, fileName),
+              obfuscated.getObfuscatedCode(),
+              'utf8'
+            );
+          } catch (error) {
+            throw new Error(
+              `Obfuscation failed for ${filePath}: ${error.message}`
+            );
+          }
+        } else {
+          console.log(`Copy ${filePath}`);
+          fs.writeFileSync(path.join(targetFolder, fileName), code, 'utf8');
+        }
+      } else {
+        fs.copyFileSync(filePath, path.join(targetFolder, fileName));
       }
     }
-    return file;
   }
 
-  async iconSet(url) {
-    let Buffer = await nodeFetch(url);
-    if (Buffer.status == 200) {
-      Buffer = await Buffer.buffer();
-      const image = await Jimp.read(Buffer);
-      Buffer = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG);
-      fs.writeFileSync(
-        'src/assets/images/icon.icns',
-        png2icons.createICNS(Buffer, png2icons.BILINEAR, 0)
-      );
-      fs.writeFileSync(
-        'src/assets/images/icon.ico',
-        png2icons.createICO(Buffer, png2icons.HERMITE, 0, false)
-      );
-      fs.writeFileSync('src/assets/images/icon.png', Buffer);
-      console.log('new icon set');
-    } else {
-      console.log('connection error');
+  getFiles(entry, acc = []) {
+    if (!fs.existsSync(entry)) {
+      return acc;
     }
+
+    const stats = fs.statSync(entry);
+    if (stats.isFile()) {
+      acc.push(entry.replace(/\\/g, '/'));
+      return acc;
+    }
+
+    const contents = fs.readdirSync(entry);
+    for (const name of contents) {
+      this.getFiles(path.join(entry, name), acc);
+    }
+    return acc;
+  }
+
+  async setIcons(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch icon (${response.status})`);
+    }
+
+    const buffer = await response.buffer();
+    const image = await Jimp.read(buffer);
+    const resized = await image.resize(256, 256).getBufferAsync(Jimp.MIME_PNG);
+
+    fs.writeFileSync(
+      'src/assets/images/icon.icns',
+      png2icons.createICNS(resized, png2icons.BILINEAR, 0)
+    );
+    fs.writeFileSync(
+      'src/assets/images/icon.ico',
+      png2icons.createICO(resized, png2icons.HERMITE, 0, false)
+    );
+    fs.writeFileSync('src/assets/images/icon.png', resized);
+    console.log('Launcher icons updated');
   }
 }
 
-new Index().init();
+(async () => {
+  try {
+    await new BuildPipeline().init();
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+})();
