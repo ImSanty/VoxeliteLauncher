@@ -6,10 +6,18 @@
 const pkg = require('../package.json');
 const nodeFetch = require('node-fetch');
 const convert = require('xml-js');
-let url = pkg.user ? `${pkg.url}/${pkg.user}` : pkg.url;
+
+const sanitizedBaseUrl = (() => {
+  const candidate = pkg.user ? `${pkg.url}/${pkg.user}` : pkg.url;
+  return typeof candidate === 'string' ? candidate.replace(/\/+$/u, '') : '';
+})();
+
+let url = sanitizedBaseUrl;
 
 let config = `${url}/launcher/config/config.json`;
-let news = `${url}/launcher/news/news.json`;
+let news = `${url}/launcher/config/news.json`;
+let instances = `${url}/launcher/config/instances.json`;
+let filesEndpoint = `${url}/launcher/files`;
 
 class Config {
   GetConfig() {
@@ -32,19 +40,37 @@ class Config {
   }
 
   async getInstanceList() {
-    let urlInstance = `${url}/launcher/files`;
-    let instances = await nodeFetch(urlInstance)
-      .then((res) => res.json())
-      .catch((err) => err);
-    let instancesList = [];
-    instances = Object.entries(instances);
+    try {
+      const response = await nodeFetch(instances);
 
-    for (let [name, data] of instances) {
-      let instance = data;
-      instance.name = name;
-      instancesList.push(instance);
+      if (!response.ok) {
+        throw new Error(response.statusText || 'Unable to fetch instances');
+      }
+
+      const payload = await response.json();
+
+      if (Array.isArray(payload)) {
+        return payload
+          .filter((entry) => entry && typeof entry === 'object')
+          .map((entry) => normalizeInstanceEntry(entry))
+          .filter(Boolean);
+      }
+
+      if (payload && typeof payload === 'object') {
+        return Object.entries(payload)
+          .map(([name, data]) =>
+            normalizeInstanceEntry({
+              name,
+              ...(data && typeof data === 'object' ? data : {})
+            })
+          )
+          .filter(Boolean);
+      }
+
+      return [];
+    } catch (error) {
+      return [];
     }
-    return instancesList;
   }
 
   async getNews() {
@@ -103,3 +129,19 @@ class Config {
 }
 
 export default new Config();
+
+function normalizeInstanceEntry(entry) {
+  const result = { ...(entry && typeof entry === 'object' ? entry : {}) };
+  const nameCandidate = result.name || result.instance || '';
+  result.name = typeof nameCandidate === 'string' ? nameCandidate : '';
+
+  if (!result.name) {
+    return null;
+  }
+
+  if (result.name && (!result.url || typeof result.url !== 'string')) {
+    result.url = `${filesEndpoint}?instance=${encodeURIComponent(result.name)}`;
+  }
+
+  return result;
+}
