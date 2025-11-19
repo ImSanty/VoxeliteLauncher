@@ -145,7 +145,7 @@ class Settings {
               (i) => i.whitelistActive == false
             );
             configClient.instance_selct = newInstanceSelect.name;
-            await setStatus(newInstanceSelect.status);
+            await setStatus(newInstanceSelect.status, newInstanceSelect.name);
           }
         }
       }
