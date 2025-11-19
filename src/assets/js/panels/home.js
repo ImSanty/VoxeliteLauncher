@@ -24,9 +24,38 @@ class Home {
     this.news();
     this.socialLick();
     this.instancesSelect();
+    this.bindAccountShortcut();
     document
       .querySelector('.settings-btn')
       .addEventListener('click', (e) => changePanel('settings'));
+  }
+
+  bindAccountShortcut() {
+    const playerHead = document.querySelector('.player-head');
+    if (!playerHead) return;
+
+    playerHead.addEventListener('click', () => {
+      changePanel('settings');
+      this.focusAccountSettingsTab();
+    });
+  }
+
+  focusAccountSettingsTab() {
+    const accountNavBtn = document.getElementById('account');
+    const accountTab = document.getElementById('account-tab');
+    if (!accountNavBtn || !accountTab) return;
+
+    const activeNavBtn = document.querySelector(
+      '.nav-settings-btn.active-settings-BTN'
+    );
+    activeNavBtn?.classList.remove('active-settings-BTN');
+    accountNavBtn.classList.add('active-settings-BTN');
+
+    const activeTab = document.querySelector(
+      '.container-settings.active-container-settings'
+    );
+    activeTab?.classList.remove('active-container-settings');
+    accountTab.classList.add('active-container-settings');
   }
 
   async news() {
@@ -159,12 +188,13 @@ class Home {
             let configClient = await this.db.readData('configClient');
             configClient.instance_selct = newInstanceSelect.name;
             instanceSelect = newInstanceSelect.name;
-            setStatus(newInstanceSelect.status);
+            setStatus(newInstanceSelect.status, newInstanceSelect.name);
             await this.db.updateData('configClient', configClient);
           }
         }
       } else console.log(`Initializing instance ${instance.name}...`);
-      if (instance.name == instanceSelect) setStatus(instance.status);
+      if (instance.name == instanceSelect)
+        setStatus(instance.status, instance.name);
     }
 
     instancePopup.addEventListener('click', async (e) => {
@@ -188,7 +218,7 @@ class Home {
         let options = instance.find(
           (i) => i.name == configClient.instance_selct
         );
-        await setStatus(options.status);
+        await setStatus(options.status, options.name);
       }
     });
 
