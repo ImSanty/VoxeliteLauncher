@@ -9,12 +9,14 @@ import {
   changePanel,
   appdata,
   setStatus,
+  setStatusTarget,
   pkg,
   popup
 } from '../utils.js';
 
 const { Launch } = require('minecraft-java-core');
-const { shell, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
+const { Buffer } = require('buffer');
 
 class Home {
   static id = 'home';
@@ -22,7 +24,6 @@ class Home {
     this.config = config;
     this.db = new database();
     this.news();
-    this.socialLick();
     this.instancesSelect();
     this.bindAccountShortcut();
     document
@@ -132,16 +133,6 @@ class Home {
     }
   }
 
-  socialLick() {
-    let socials = document.querySelectorAll('.social-block');
-
-    socials.forEach((social) => {
-      social.addEventListener('click', (e) => {
-        shell.openExternal(e.target.dataset.url);
-      });
-    });
-  }
-
   async instancesSelect() {
     let configClient = await this.db.readData('configClient');
     let auth = await this.db.readData(
@@ -149,6 +140,7 @@ class Home {
       configClient.account_selected
     );
     let instancesList = await config.getInstanceList();
+    let selectedInstanceConfig = null;
     let instanceSelect = instancesList.find(
       (i) => i.name == configClient?.instance_selct
     )
@@ -156,6 +148,7 @@ class Home {
       : null;
 
     let instanceBTN = document.querySelector('.play-instance');
+    let instanceSelectControl = document.querySelector('.instance-select');
     let instancePopup = document.querySelector('.instance-popup');
     let instancesListPopup = document.querySelector('.instances-List');
     let instanceCloseBTN = document.querySelector('.close-popup');
@@ -172,6 +165,7 @@ class Home {
       let configClient = await this.db.readData('configClient');
       configClient.instance_selct = newInstanceSelect.name;
       instanceSelect = newInstanceSelect.name;
+      selectedInstanceConfig = newInstanceSelect;
       await this.db.updateData('configClient', configClient);
     }
 
@@ -188,13 +182,29 @@ class Home {
             let configClient = await this.db.readData('configClient');
             configClient.instance_selct = newInstanceSelect.name;
             instanceSelect = newInstanceSelect.name;
-            setStatus(newInstanceSelect.status, newInstanceSelect.name);
+            selectedInstanceConfig = newInstanceSelect;
             await this.db.updateData('configClient', configClient);
           }
         }
       } else console.log(`Initializing instance ${instance.name}...`);
-      if (instance.name == instanceSelect)
-        setStatus(instance.status, instance.name);
+      if (instance.name == instanceSelect) selectedInstanceConfig = instance;
+    }
+
+    if (!selectedInstanceConfig) {
+      selectedInstanceConfig = instancesList.find(
+        (entry) => entry.name === instanceSelect
+      );
+    }
+
+    if (selectedInstanceConfig) {
+      setStatusTarget(selectedInstanceConfig.name);
+      await setStatus(
+        selectedInstanceConfig.status,
+        selectedInstanceConfig.name
+      );
+    } else {
+      setStatusTarget(null);
+      await setStatus(null);
     }
 
     instancePopup.addEventListener('click', async (e) => {
@@ -210,19 +220,19 @@ class Home {
 
         configClient.instance_selct = newInstanceSelect;
         await this.db.updateData('configClient', configClient);
-        instanceSelect = instancesList.filter(
-          (i) => i.name == newInstanceSelect
-        );
         instancePopup.style.display = 'none';
         let instance = await config.getInstanceList();
         let options = instance.find(
           (i) => i.name == configClient.instance_selct
         );
-        await setStatus(options.status, options.name);
+        if (options) {
+          setStatusTarget(options.name);
+          await setStatus(options.status, options.name);
+        }
       }
     });
 
-    instanceBTN.addEventListener('click', async (e) => {
+    const renderInstancesPopup = async () => {
       let configClient = await this.db.readData('configClient');
       let instanceSelect = configClient.instance_selct;
       let auth = await this.db.readData(
@@ -230,33 +240,34 @@ class Home {
         configClient.account_selected
       );
 
-      if (e.target.classList.contains('instance-select')) {
-        instancesListPopup.innerHTML = '';
-        for (let instance of instancesList) {
-          if (instance.whitelistActive) {
-            instance.whitelist.map((whitelist) => {
-              if (whitelist == auth?.name) {
-                if (instance.name == instanceSelect) {
-                  instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements active-instance">${instance.name}</div>`;
-                } else {
-                  instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements">${instance.name}</div>`;
-                }
-              }
-            });
-          } else {
-            if (instance.name == instanceSelect) {
-              instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements active-instance">${instance.name}</div>`;
-            } else {
-              instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements">${instance.name}</div>`;
-            }
-          }
+      instancesListPopup.innerHTML = '';
+
+      for (let instance of instancesList) {
+        if (instance.whitelistActive) {
+          const allowed = instance.whitelist.some(
+            (whitelist) => whitelist == auth?.name
+          );
+          if (!allowed) continue;
         }
 
-        instancePopup.style.display = 'flex';
+        const isActive = instance.name == instanceSelect;
+        instancesListPopup.innerHTML += `<div id="${
+          instance.name
+        }" class="instance-elements${isActive ? ' active-instance' : ''}">${
+          instance.name
+        }</div>`;
       }
 
-      if (!e.target.classList.contains('instance-select')) this.startGame();
+      instancePopup.style.display = 'flex';
+    };
+
+    instanceSelectControl?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      await renderInstancesPopup();
     });
+
+    instanceBTN.addEventListener('click', () => this.startGame());
 
     instanceCloseBTN.addEventListener(
       'click',
@@ -267,12 +278,75 @@ class Home {
   async startGame() {
     let launch = new Launch();
     let configClient = await this.db.readData('configClient');
+    const keepLauncherVisible =
+      configClient?.launcher_config?.closeLauncher !== 'close-launcher';
+    const consoleEnabled =
+      (configClient?.launcher_config?.consoleMode || 'hidden') === 'window';
+
+    const toConsoleString = (value) => {
+      if (value === null || typeof value === 'undefined') return '';
+      if (typeof value === 'string') return value;
+      if (Buffer.isBuffer(value)) return value.toString('utf8');
+      if (typeof value === 'object') {
+        try {
+          return JSON.stringify(value);
+        } catch (error) {
+          return String(value);
+        }
+      }
+      return String(value);
+    };
+
+    const sendConsole = (channel, payload) => {
+      if (!consoleEnabled) return;
+      ipcRenderer.send(channel, payload);
+    };
+
+    const ensureConsoleWindow = (meta = {}) => {
+      sendConsole('console-window-open', { focus: false, meta });
+    };
+
+    const consoleLog = (message, level = 'info', source = 'launcher') => {
+      if (!consoleEnabled) return;
+      let output = toConsoleString(message);
+      if (!output.trim()) return;
+      sendConsole('console-window-log', {
+        message: output,
+        level,
+        source,
+        timestamp: Date.now()
+      });
+    };
+
+    const consoleState = (state = {}) => {
+      if (!consoleEnabled) return;
+      sendConsole('console-window-status', state);
+    };
+
     let instance = await config.getInstanceList();
     let authenticator = await this.db.readData(
       'accounts',
       configClient.account_selected
     );
     let options = instance.find((i) => i.name == configClient.instance_selct);
+
+    if (consoleEnabled && options) {
+      const meta = {
+        instance: options.name,
+        version: options.loadder?.minecraft_version || 'Desconocida',
+        account: authenticator?.name || 'Sin sesión'
+      };
+      ensureConsoleWindow(meta);
+      consoleLog(
+        `Preparando instancia ${meta.instance} (${meta.version})`,
+        'status'
+      );
+      consoleState({
+        phase: 'preparing',
+        label: 'Preparando archivos...',
+        meta
+      });
+    }
 
     let playInstanceBTN = document.querySelector('.play-instance');
     let infoStartingBOX = document.querySelector('.info-starting-game');
@@ -334,12 +408,14 @@ class Home {
     let currentPhase = 'download';
 
     const updateLabel = () => {
-      infoStarting.innerHTML = buildDownloadLabel({
+      const label = buildDownloadLabel({
         phase: currentPhase,
         percent: lastPercent,
         speedBps: currentPhase === 'download' ? lastSpeedBps : undefined,
         etaSeconds: currentPhase === 'download' ? lastEtaSeconds : undefined
       });
+      infoStarting.innerHTML = label;
+      return label;
     };
 
     updateLabel();
@@ -347,6 +423,8 @@ class Home {
 
     launch.on('extract', (extract) => {
       ipcRenderer.send('main-window-progress-load');
+      consoleState({ phase: 'preparing', label: 'Extrayendo librerías...' });
+      consoleLog(`[Extract] ${toConsoleString(extract)}`, 'info');
       console.log(extract);
     });
 
@@ -378,7 +456,8 @@ class Home {
         lastEtaSeconds = derivedEta;
       }
 
-      updateLabel();
+      const label = updateLabel();
+      consoleState({ phase: 'download', label });
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
       progressBar.max = size;
@@ -388,7 +467,8 @@ class Home {
       currentPhase = 'verify';
       const percent = size > 0 ? (progress / size) * 100 : 0;
       lastPercent = percent;
-      updateLabel();
+      const label = updateLabel();
+      consoleState({ phase: 'verifying', label });
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
       progressBar.max = size;
@@ -398,7 +478,8 @@ class Home {
       if (Number.isFinite(time) && time >= 0) {
         lastEtaSeconds = time;
         if (currentPhase === 'download') {
-          updateLabel();
+          const label = updateLabel();
+          consoleState({ phase: 'download', label });
         }
       }
     });
@@ -407,7 +488,8 @@ class Home {
       if (Number.isFinite(speed) && speed > 0) {
         lastSpeedBps = speed;
         if (currentPhase === 'download') {
-          updateLabel();
+          const label = updateLabel();
+          consoleState({ phase: 'download', label });
         }
       }
     });
@@ -416,17 +498,23 @@ class Home {
       console.log(patch);
       ipcRenderer.send('main-window-progress-load');
       infoStarting.innerHTML = `Parche en proceso...`;
+      consoleState({ phase: 'preparing', label: 'Aplicando parches...' });
+      consoleLog(`[Patch] ${toConsoleString(patch)}`, 'info');
     });
 
     launch.on('data', (e) => {
       progressBar.style.display = 'none';
       progressBar.classList.remove('progress-bar-active');
-      if (configClient.launcher_config.closeLauncher == 'close-launcher') {
+      if (!keepLauncherVisible) {
         ipcRenderer.send('main-window-hide');
       }
       new logger('Minecraft', '#36b030');
       ipcRenderer.send('main-window-progress-load');
-      infoStarting.innerHTML = `Iniciando...`;
+      infoStarting.innerHTML = keepLauncherVisible
+        ? 'Jugando...'
+        : `Iniciando...`;
+      consoleState({ phase: 'running', label: 'Minecraft en ejecución' });
+      consoleLog(e, 'stdout', 'game');
       console.log(e);
     });
 
@@ -440,6 +528,18 @@ class Home {
       progressBar.classList.remove('progress-bar-active');
       infoStarting.innerHTML = `Verificando`;
       new logger(pkg.name, '#7289da');
+      consoleLog(
+        `Proceso de juego finalizado con código ${code ?? 0}`,
+        'status',
+        'game'
+      );
+      consoleState({
+        phase: 'closed',
+        label:
+          code === 0
+            ? 'Juego cerrado correctamente'
+            : `Juego cerrado con código ${code}`
+      });
       console.log('Cerrar');
     });
 
@@ -462,6 +562,11 @@ class Home {
       progressBar.classList.remove('progress-bar-active');
       infoStarting.innerHTML = `Verificando`;
       new logger(pkg.name, '#7289da');
+      consoleLog(err?.error || err, 'error', 'launcher');
+      consoleState({
+        phase: 'error',
+        label: err?.error || 'Error durante el lanzamiento'
+      });
       console.log(err);
     });
   }
