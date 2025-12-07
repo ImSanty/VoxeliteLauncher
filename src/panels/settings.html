@@ -1,10 +1,9 @@
 <div class="container">
     <div class="nav-settings">
-        <p>Configuracion</p>
+        <p>Configuración</p>
         <div class="nav-box">
             <div id="account" class="nav-settings-btn active-settings-BTN">Cuentas</div>
             <div id="launcher" class="nav-settings-btn">Launcher</div>
-            <div id="resolution" class="nav-settings-btn">Resolucion</div>
             <div id="java" class="nav-settings-btn">Java</div>
             <div id="credits" class="nav-settings-btn">Créditos</div>
             <div id="save" class="nav-settings-btn">Guardar</div>
@@ -12,14 +11,13 @@
     </div>
 
     <div id="launcher-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Opciones de descarga</div>
+        <div class="titre-tab">Descargas simultáneas</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Esta opcion determina la cantidad de archivos que se pueden descargar en simultaneo durante una descarga
-                o instalacion.<br><br>
-
-                Tene en cuenta que cambiar este valor puede afectar el rendimiento durante las descargas.<br>
-                Te recomiendo no exceder los limites preestablecidos, puede ocacionar problemas de conectividad.
+                Indicá cuántos archivos querés descargar al mismo tiempo durante una actualización o
+                instalación.<br><br>
+                Valores muy altos pueden saturar tu conexión, así que subilo solo si necesitás acelerar descargas
+                grandes.
             </div>
             <div class="settings-elements content-center">
                 <input type="number" class="max-files input-max-files">
@@ -27,26 +25,11 @@
             </div>
         </div>
 
-        <div class="titre-tab">Temas</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Elige entre el tema claro y oscuro para personalizar el launcher.<br><br>
-
-                Modificar el tema puede afectar en la apariencia y legibilidad.<br>
-                Selecciona la que consideres conveniente.
-            </div>
-            <div class="settings-elements content-center theme-box">
-                <div class="theme-btn theme-btn-clair">Claro</div>
-                <div class="theme-btn theme-btn-sombre">Oscuro</div>
-                <div class="theme-btn theme-btn-auto">Automatico</div>
-            </div>
-        </div>
-
         <div class="titre-tab">Consola del juego</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Decide si queres mantener la consola oculta o verla en una ventana separada cuando el juego se inicia.
-                Mostrarla te permite seguir el progreso en tiempo real y revisar logs detallados si ocurre un crash.
+                Elegí si preferís ocultar la consola o verla en una ventana aparte cuando el juego arranca.
+                Verla ayuda a seguir el progreso y revisar logs si algo falla.
             </div>
             <div class="settings-elements content-evenly console-box">
                 <div class="console-btn" data-mode="hidden">Ocultar consola</div>
@@ -54,30 +37,34 @@
             </div>
         </div>
 
-        <div class="titre-tab">Comportamiento del launcher al iniciar el juego</div>
+        <div class="titre-tab">Resolución del juego</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Podes elegir si el launcher permanece abierto o se cierra al iniciar el juego.
+                Ajustá la resolución si la predeterminada no te resulta cómoda.<br>
+                Podés elegir la que quieras; 1280 x 720 suele funcionar bien en la mayoría de las pantallas.
             </div>
-
-            <div class="settings-elements content-evenly close-box">
-                <div class="close-launcher close-btn">Cerrar el launcher al iniciar el juego</div>
-                <div class="close-none close-btn">Mantener el launcher abierto</div>
-                <div class="close-all close-btn">Cerrar el juego si el launcher se cierra</div>
+            <div class="settings-elements content-center">
+                <div class="input-size-element">
+                    <input type="number" class="width-size input-resolution">
+                    <div class="size-cross"></div>
+                    <input type="number" class="height-size input-resolution">
+                </div>
+                <div class="size-reset size-btn">Por defecto</div>
             </div>
         </div>
 
-        <!-- <div class="titre-tab">Environnement INTEL</div>
+        <div class="titre-tab">Launcher durante el juego</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                pour les jouer avec les proseceurs apple silicon 
+                Definí qué pasa con el launcher una vez que el juego está en marcha.
             </div>
 
             <div class="settings-elements content-evenly close-box">
-                <div class="close-launcher close-btn">Environnement INTEL</div>
-                <div class="close-none close-btn">Environnement SILICON</div>
+                <div class="close-launcher close-btn">Cerrar launcher al iniciar el juego</div>
+                <div class="close-none close-btn">Mantener launcher abierto</div>
+                <div class="close-all close-btn">Cerrar juego si se cierra el launcher</div>
             </div>
-        </div> -->
+        </div>
     </div>
 
     <div id="account-tab" class="container-settings active-container-settings">
@@ -92,34 +79,13 @@
         </div>
     </div>
 
-    <div id="resolution-tab" class="container-settings">
-        <div class="titre-tab">Resolucion del juego</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Define una resolucion personalizada si la default no se adapta a tu monitor.<br>
-                Podes cambiarla a la que desees. Te recomiendo que uses 1280 X 720.
-            </div>
-            <div class="settings-elements content-center">
-                <div class="input-size-element">
-                    <input type="number" class="width-size input-resolution">
-                    <div class="size-cross"></div>
-                    <input type="number" class="height-size input-resolution">
-                </div>
-                <div class="size-reset size-btn">Por defecto</div>
-            </div>
-        </div>
-    </div>
-
     <div id="java-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Configuracion de JAVA</div>
+        <div class="titre-tab">Configuración de Java</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Elige la cantidad de RAM que queres asignar al juego, esto es necesario y afecta al rendimiento en
-                ModPacks grandes :)<br><br>
-                Usa el control para seleccionar la cantidad total de RAM que queres asignar al juego. Te recomiendo no
-                pasar el 65% del total disponible en tu PC.<br><br>
-                El launcher usará ese mismo valor como asignación mínima para que no tengas que configurar dos
-                controles distintos.
+                Asigná la RAM que querés destinar al juego. Para ModPacks grandes tal vez necesites un poco más.<br><br>
+                Mové el control para definir la memoria total. Evitá superar el 65% de la RAM disponible para mantener
+                la estabilidad.
             </div>
             <div class="settings-elements content-evenly">
                 <div class="memory-slider" min="0.5" max="8" step="0.5">
@@ -134,8 +100,8 @@
                     </div>
                 </div>
                 <div class="ram-info-block">
-                    <b>Tenes un total de <span id="total-ram">0 GB</span> de RAM.</b><br>
-                    <b>Tenes <span id="free-ram">0 GB</span> de RAM disponible.</b>
+                    <b>Tenés un total de <span id="total-ram">0 GB</span> de RAM.</b><br>
+                    <b>Tenés <span id="free-ram">0 GB</span> de RAM disponible.</b>
                 </div>
             </div>
         </div>
@@ -143,9 +109,9 @@
         <div class="titre-tab">Java runtime</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                El launcher se encarga automaticamente de gestionar la version de Java.<br>
-                La version esta disponible en :<br><span class="java-path-txt"></span><br>
-                De todos modos podes seleccionar un version especifica de java si lo deseas :)
+                El launcher instala y actualiza Java por vos.<br>
+                Podés encontrarlo en:<br><span class="java-path-txt"></span><br>
+                Si preferís usar otra versión, seleccionala manualmente.
             </div>
             <div class="settings-elements content-evenly">
                 <input type="text" class="java-path-input-text" disabled>
@@ -159,7 +125,7 @@
     </div>
 
     <div id="credits-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Creditos y redes</div>
+        <div class="titre-tab">Créditos y redes</div>
         <div class="settings-elements-box">
             <div class="setting-text">
                 Seguí las novedades del proyecto en estas redes oficiales.
@@ -171,7 +137,7 @@
                     </div>
                     <div class="credit-info">
                         <div class="credit-label">GitHub</div>
-                        <div class="credit-description">Codigo fuente y aportes</div>
+                        <div class="credit-description">Código fuente y aportes</div>
                     </div>
                     <div class="credit-handle">@ImSanty</div>
                     <div class="credit-arrow icon-arrow"></div>
@@ -183,7 +149,7 @@
                     </div>
                     <div class="credit-info">
                         <div class="credit-label">YouTube</div>
-                        <div class="credit-description">Videos y guias del launcher</div>
+                        <div class="credit-description">Videos y guías del launcher</div>
                     </div>
                     <div class="credit-handle">@ImSanty</div>
                     <div class="credit-arrow icon-arrow"></div>
