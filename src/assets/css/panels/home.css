@@ -390,8 +390,11 @@
 
 .info-starting-game {
     display: none;
-    margin-left: 1.5rem;
     align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 0;
+    margin-left: -5rem;
 }
 
 .progress-bar-container {

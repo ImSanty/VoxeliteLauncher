@@ -430,7 +430,9 @@ class Home {
       const name = typeof file.name === 'string' ? file.name.trim() : null;
       if (normalizedPath) {
         if (normalizedPath.startsWith(baseGamePath)) {
-          const relative = normalizedPath.slice(baseGamePath.length).replace(/^\//, '');
+          const relative = normalizedPath
+            .slice(baseGamePath.length)
+            .replace(/^\//, '');
           if (relative) {
             return relative;
           }
