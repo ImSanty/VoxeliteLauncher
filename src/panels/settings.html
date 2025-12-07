@@ -6,6 +6,7 @@
             <div id="launcher" class="nav-settings-btn">Launcher</div>
             <div id="resolution" class="nav-settings-btn">Resolucion</div>
             <div id="java" class="nav-settings-btn">Java</div>
+            <div id="credits" class="nav-settings-btn">Créditos</div>
             <div id="save" class="nav-settings-btn">Guardar</div>
         </div>
     </div>
@@ -38,6 +39,18 @@
                 <div class="theme-btn theme-btn-clair">Claro</div>
                 <div class="theme-btn theme-btn-sombre">Oscuro</div>
                 <div class="theme-btn theme-btn-auto">Automatico</div>
+            </div>
+        </div>
+
+        <div class="titre-tab">Consola del juego</div>
+        <div class="settings-elements-box">
+            <div class="setting-text">
+                Decide si queres mantener la consola oculta o verla en una ventana separada cuando el juego se inicia.
+                Mostrarla te permite seguir el progreso en tiempo real y revisar logs detallados si ocurre un crash.
+            </div>
+            <div class="settings-elements content-evenly console-box">
+                <div class="console-btn" data-mode="hidden">Ocultar consola</div>
+                <div class="console-btn" data-mode="window">Mostrar consola</div>
             </div>
         </div>
 
@@ -103,11 +116,10 @@
             <div class="setting-text">
                 Elige la cantidad de RAM que queres asignar al juego, esto es necesario y afecta al rendimiento en
                 ModPacks grandes :)<br><br>
-                <b>-Maximo:</b> Selecciona la cantidad total de RAM que queres asignar al juego. Te recomiendo no pasar
-                el 65% total de RAM disponible en tu PC.<br><br>
-                <b>-Minimo:</b> Selecciona la cantidad minima de RAM que el juego puede usar. Te recomiendo no tocar
-                esta
-                opcion a menos que tengas ideas de lo que haces.
+                Usa el control para seleccionar la cantidad total de RAM que queres asignar al juego. Te recomiendo no
+                pasar el 65% del total disponible en tu PC.<br><br>
+                El launcher usará ese mismo valor como asignación mínima para que no tengas que configurar dos
+                controles distintos.
             </div>
             <div class="settings-elements content-evenly">
                 <div class="memory-slider" min="0.5" max="8" step="0.5">
@@ -142,6 +154,52 @@
                     <div class="java-path-set java-path-btn">Abrir</div>
                     <div class="java-path-reset java-path-btn">Por defecto</div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits-tab" class="container-settings content-scroll">
+        <div class="titre-tab">Creditos y redes</div>
+        <div class="settings-elements-box">
+            <div class="setting-text">
+                Seguí las novedades del proyecto en estas redes oficiales.
+            </div>
+            <div class="credits-list">
+                <button type="button" class="credit-item" data-url="https://github.com/ImSanty">
+                    <div class="credit-icon">
+                        <div class="credit-symbol icon-github"></div>
+                    </div>
+                    <div class="credit-info">
+                        <div class="credit-label">GitHub</div>
+                        <div class="credit-description">Codigo fuente y aportes</div>
+                    </div>
+                    <div class="credit-handle">@ImSanty</div>
+                    <div class="credit-arrow icon-arrow"></div>
+                </button>
+
+                <button type="button" class="credit-item" data-url="https://www.youtube.com/ImSanty">
+                    <div class="credit-icon">
+                        <div class="credit-symbol icon-youtube"></div>
+                    </div>
+                    <div class="credit-info">
+                        <div class="credit-label">YouTube</div>
+                        <div class="credit-description">Videos y guias del launcher</div>
+                    </div>
+                    <div class="credit-handle">@ImSanty</div>
+                    <div class="credit-arrow icon-arrow"></div>
+                </button>
+
+                <button type="button" class="credit-item" data-url="">
+                    <div class="credit-icon">
+                        <div class="credit-symbol icon-discord"></div>
+                    </div>
+                    <div class="credit-info">
+                        <div class="credit-label">Discord</div>
+                        <div class="credit-description">Soporte y comunidad</div>
+                    </div>
+                    <div class="credit-handle">Próximamente</div>
+                    <div class="credit-arrow icon-arrow"></div>
+                </button>
             </div>
         </div>
     </div>

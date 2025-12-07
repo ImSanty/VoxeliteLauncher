@@ -10,11 +10,12 @@ import {
   Slider,
   config,
   setStatus,
+  setStatusTarget,
   popup,
   appdata,
   setBackground
 } from '../utils.js';
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, shell } = require('electron');
 const os = require('os');
 
 class Settings {
@@ -28,6 +29,7 @@ class Settings {
     this.javaPath();
     this.resolution();
     this.launcher();
+    this.credits();
   }
 
   navBTN() {
@@ -145,6 +147,7 @@ class Settings {
               (i) => i.whitelistActive == false
             );
             configClient.instance_selct = newInstanceSelect.name;
+            setStatusTarget(newInstanceSelect.name);
             await setStatus(newInstanceSelect.status, newInstanceSelect.name);
           }
         }
@@ -154,7 +157,7 @@ class Settings {
   }
 
   async ram() {
-    let config = await this.db.readData('configClient');
+    let configClient = await this.db.readData('configClient');
     let totalMem = Math.trunc((os.totalmem() / 1073741824) * 10) / 10;
     let freeMem = Math.trunc((os.freemem() / 1073741824) * 10) / 10;
 
@@ -162,38 +165,47 @@ class Settings {
     document.getElementById('free-ram').textContent = `${freeMem} GB`;
 
     let sliderDiv = document.querySelector('.memory-slider');
-    sliderDiv.setAttribute('max', Math.trunc((80 * totalMem) / 100));
+    if (!sliderDiv) return;
 
-    let ram = config?.java_config?.java_memory
-      ? {
-          ramMin: config.java_config.java_memory.min,
-          ramMax: config.java_config.java_memory.max
-        }
-      : { ramMin: '1', ramMax: '2' };
+    const sliderMinAttr = parseFloat(sliderDiv.getAttribute('min')) || 1;
+    const sliderMaxAttr = Math.max(
+      sliderMinAttr,
+      Math.trunc((80 * totalMem) / 100)
+    );
+    sliderDiv.setAttribute('max', sliderMaxAttr);
 
-    if (totalMem < ram.ramMin) {
-      config.java_config.java_memory = { min: 1, max: 2 };
-      this.db.updateData('configClient', config);
-      ram = { ramMin: '1', ramMax: '2' };
-    }
-
-    let slider = new Slider(
-      '.memory-slider',
-      parseFloat(ram.ramMin),
-      parseFloat(ram.ramMax)
+    let storedMemory = configClient?.java_config?.java_memory || {};
+    let initialValue = parseFloat(
+      storedMemory.max ?? storedMemory.min ?? sliderMinAttr
     );
 
-    let minSpan = document.querySelector('.slider-touch-left span');
+    if (!Number.isFinite(initialValue) || initialValue < sliderMinAttr) {
+      initialValue = sliderMinAttr;
+    }
+    if (initialValue > sliderMaxAttr) {
+      initialValue = sliderMaxAttr;
+    }
+
+    if (
+      storedMemory.min !== initialValue ||
+      storedMemory.max !== initialValue
+    ) {
+      configClient.java_config.java_memory = {
+        min: initialValue,
+        max: initialValue
+      };
+      this.db.updateData('configClient', configClient);
+    }
+
+    let slider = new Slider('.memory-slider', null, initialValue);
     let maxSpan = document.querySelector('.slider-touch-right span');
+    maxSpan.setAttribute('value', `${initialValue} GB`);
 
-    minSpan.setAttribute('value', `${ram.ramMin} GB`);
-    maxSpan.setAttribute('value', `${ram.ramMax} GB`);
-
-    slider.on('change', async (min, max) => {
+    slider.on('change', async (_min, max) => {
+      let value = Math.max(sliderMinAttr, Math.min(max, sliderMaxAttr));
+      maxSpan.setAttribute('value', `${value} GB`);
       let config = await this.db.readData('configClient');
-      minSpan.setAttribute('value', `${min} GB`);
-      maxSpan.setAttribute('value', `${max} GB`);
-      config.java_config.java_memory = { min: min, max: max };
+      config.java_config.java_memory = { min: value, max: value };
       this.db.updateData('configClient', config);
     });
   }
@@ -342,6 +354,35 @@ class Settings {
       }
     });
 
+    const consoleBox = document.querySelector('.console-box');
+    const consoleButtons = document.querySelectorAll('.console-btn');
+    let consoleMode = configClient?.launcher_config?.consoleMode || 'hidden';
+
+    const setActiveConsole = (mode) => {
+      consoleButtons.forEach((btn) => {
+        btn.classList.toggle('active-console', btn.dataset.mode === mode);
+      });
+    };
+
+    setActiveConsole(consoleMode);
+
+    consoleBox?.addEventListener('click', async (e) => {
+      const target = e.target.closest('.console-btn');
+      if (!target) return;
+      const mode = target.dataset.mode;
+      if (!mode || mode === consoleMode) return;
+      consoleMode = mode;
+      setActiveConsole(consoleMode);
+      let configClient = await this.db.readData('configClient');
+      configClient.launcher_config.consoleMode = consoleMode;
+      await this.db.updateData('configClient', configClient);
+      if (consoleMode === 'window') {
+        ipcRenderer.send('console-window-open', { focus: true });
+      } else {
+        ipcRenderer.send('console-window-close');
+      }
+    });
+
     let closeBox = document.querySelector('.close-box');
     let closeLauncher =
       configClient?.launcher_config?.closeLauncher || 'close-launcher';
@@ -376,6 +417,17 @@ class Settings {
           await this.db.updateData('configClient', configClient);
         }
       }
+    });
+  }
+
+  credits() {
+    let creditsList = document.querySelector('.credits-list');
+    if (!creditsList) return;
+
+    creditsList.addEventListener('click', (e) => {
+      let item = e.target.closest('.credit-item');
+      if (!item || !item.dataset.url) return;
+      shell.openExternal(item.dataset.url);
     });
   }
 }
