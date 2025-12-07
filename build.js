@@ -45,14 +45,20 @@ class Index {
         if (this.obf) {
           await new Promise((resolve) => {
             console.log(`Obfuscate ${path}`);
-            let obf = JavaScriptObfuscator.obfuscate(code, {
-              optionsPreset: 'medium-obfuscation',
-              disableConsoleOutput: false
+            const presetOptions =
+              JavaScriptObfuscator.getOptionsByPreset('medium-obfuscation');
+            const obfuscationOptions = Object.assign({}, presetOptions, {
+              disableConsoleOutput: false,
+              target: 'node'
             });
+            const obfuscationResult = JavaScriptObfuscator.obfuscate(
+              code,
+              obfuscationOptions
+            );
             resolve(
               fs.writeFileSync(
                 `${folder}/${fileName}`,
-                obf.getObfuscatedCode(),
+                obfuscationResult.getObfuscatedCode(),
                 { encoding: 'utf-8' }
               )
             );
