@@ -1,16 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #030611;
-  --bg-secondary: rgba(12, 22, 43, 0.88);
+  --bg-primary: rgba(10, 14, 24, 0.35);
+  --bg-secondary: rgba(16, 20, 32, 0.28);
   --accent: #9bf0ff;
   --accent-strong: #5c7cfa;
   --text: #edf0ff;
-  --text-muted: #99a0c3;
+  --text-muted: #aeb6d5;
   --danger: #ff7b7b;
   --success: #48f2b3;
   --warning: #ffd65f;
-  --border: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.16);
 }
 
 * {
@@ -21,7 +21,7 @@
 
 body {
   font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
-  background: var(--bg-secondary);
+  background: transparent;
   min-height: 100vh;
   color: var(--text);
   margin: 0;
@@ -35,21 +35,9 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: linear-gradient(120deg, rgba(255, 255, 255, 0.02) 10%, transparent 10%),
-    linear-gradient(300deg, rgba(255, 255, 255, 0.02) 10%, transparent 10%);
-  background-size: 120px 120px;
-  opacity: 0.6;
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
   pointer-events: none;
-  animation: gridFloat 16s linear infinite;
-}
-
-@keyframes gridFloat {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-120px, -120px, 0);
-  }
 }
 
 .console-shell {
@@ -58,31 +46,32 @@ body::before {
   height: 100vh;
   min-height: 520px;
   border-radius: 0;
-  background: radial-gradient(circle at 12% 20%, rgba(41, 71, 150, 0.35), transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(92, 124, 250, 0.2), transparent 50%),
-    var(--bg-secondary);
-  border: none;
-  box-shadow: none;
-  padding: 12px 32px 28px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(12, 18, 32, 0.4) 75%);
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(6, 10, 24, 0.35);
+  padding: 18px 36px 30px;
   display: flex;
   flex-direction: column;
-  backdrop-filter: none;
+  backdrop-filter: blur(34px);
+  -webkit-backdrop-filter: blur(34px);
 }
 
 .console-drag-strip {
   width: 100%;
   height: 36px;
-  margin: 0 auto 18px;
+  margin: 0 auto 20px;
   border-radius: 999px;
-  background: rgba(12, 22, 43, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 32px rgba(5, 6, 17, 0.45);
+  box-shadow: 0 18px 42px rgba(6, 10, 24, 0.35);
   -webkit-app-region: drag;
   cursor: grab;
   position: relative;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 }
 
 .console-drag-strip:active {
@@ -94,7 +83,7 @@ body::before {
   width: 64px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.65);
   position: relative;
   pointer-events: none;
 }
@@ -106,7 +95,7 @@ body::before {
   width: 44px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.4);
   left: 50%;
   transform: translateX(-50%);
 }
@@ -125,7 +114,7 @@ body::before {
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
   -webkit-app-region: drag;
 }
 
@@ -152,11 +141,13 @@ body::before {
 .title-pill {
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(92, 124, 250, 0.15);
+  background: rgba(255, 255, 255, 0.14);
   color: var(--accent);
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .console-actions {
@@ -169,18 +160,20 @@ body::before {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: 200ms ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .toolbar-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .toolbar-btn:active {
@@ -265,9 +258,11 @@ body::before {
   font-size: 0.85rem;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--text-muted);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .meta-chip b {
@@ -282,8 +277,10 @@ body::before {
   padding: 10px 14px;
   margin-bottom: 18px;
   border-radius: 16px;
-  background: rgba(92, 124, 250, 0.08);
-  border: 1px solid rgba(155, 240, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(155, 240, 255, 0.2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .status-indicator {
@@ -302,14 +299,16 @@ body::before {
 .console-log {
   flex: 1;
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(12, 18, 32, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 18px;
   overflow-y: auto;
   font-family: 'JetBrains Mono', 'Space Mono', monospace;
   font-size: 0.92rem;
   line-height: 1.5;
   position: relative;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 }
 
 .console-log::before {
@@ -317,7 +316,7 @@ body::before {
   position: absolute;
   inset: 16px;
   border-radius: 14px;
-  border: 1px dashed rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
   pointer-events: none;
 }
 
@@ -388,7 +387,7 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.28);
   border-radius: 999px;
 }
 

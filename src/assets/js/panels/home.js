@@ -406,6 +406,42 @@ class Home {
     let lastSpeedBps = 0;
     let lastEtaSeconds = null;
     let currentPhase = 'download';
+    const downloadLogKeys = new Set();
+    const baseGamePath = opt.path.replace(/\\/g, '/');
+
+    const normalizeDownloadKey = (file) => {
+      if (!file) return null;
+      if (typeof file === 'string') return file;
+      return (
+        file.path ||
+        file.name ||
+        file.url ||
+        (file.type ? `type:${file.type}` : null)
+      );
+    };
+
+    const formatDownloadLabel = (file) => {
+      if (!file) return null;
+      if (typeof file === 'string') return file;
+
+      const normalizedPath = file.path
+        ? file.path.replace(/\\/g, '/').trim()
+        : null;
+      const name = typeof file.name === 'string' ? file.name.trim() : null;
+      if (normalizedPath) {
+        if (normalizedPath.startsWith(baseGamePath)) {
+          const relative = normalizedPath.slice(baseGamePath.length).replace(/^\//, '');
+          if (relative) {
+            return relative;
+          }
+        }
+        return normalizedPath;
+      }
+      if (name) return name;
+      if (file.type) return file.type;
+      if (typeof file.url === 'string') return file.url.trim();
+      return null;
+    };
 
     const updateLabel = () => {
       const label = buildDownloadLabel({
@@ -420,6 +456,20 @@ class Home {
 
     updateLabel();
     ipcRenderer.send('main-window-progress-load');
+
+    launch.on('download', ({ status, file }) => {
+      if (status !== 'start') return;
+      const key = normalizeDownloadKey(file);
+      if (key) {
+        if (downloadLogKeys.has(key)) {
+          return;
+        }
+        downloadLogKeys.add(key);
+      }
+      const label = formatDownloadLabel(file);
+      if (!label) return;
+      consoleLog(`[Descarga] ${label}`, 'info');
+    });
 
     launch.on('extract', (extract) => {
       ipcRenderer.send('main-window-progress-load');
@@ -509,7 +559,7 @@ class Home {
         ipcRenderer.send('main-window-hide');
       }
       new logger('Minecraft', '#36b030');
-      ipcRenderer.send('main-window-progress-load');
+      ipcRenderer.send('main-window-progress-reset');
       infoStarting.innerHTML = keepLauncherVisible
         ? 'Jugando...'
         : `Iniciando...`;
