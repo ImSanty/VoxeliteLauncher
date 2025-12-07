@@ -109,9 +109,31 @@ async function headplayer(skinBase64) {
 }
 
 let statusPollToken = 0;
+let statusInstanceGuard = null;
+
+function setStatusTarget(instanceName) {
+  statusInstanceGuard =
+    typeof instanceName === 'string' && instanceName.trim().length
+      ? instanceName.trim()
+      : null;
+}
 
 async function setStatus(opt, displayNameOverride) {
+  const normalizedInstanceName =
+    typeof displayNameOverride === 'string' ? displayNameOverride.trim() : '';
+
+  const matchesActiveInstance = () =>
+    !statusInstanceGuard ||
+    !normalizedInstanceName ||
+    statusInstanceGuard === normalizedInstanceName;
+
+  if (!matchesActiveInstance()) {
+    return;
+  }
+
   const currentToken = ++statusPollToken;
+  const isCurrent = () =>
+    currentToken === statusPollToken && matchesActiveInstance();
   let nameServerElement = document.querySelector('.server-status-name');
   let statusServerElement = document.querySelector('.server-status-text');
   let playersOnline = document.querySelector(
@@ -125,7 +147,7 @@ async function setStatus(opt, displayNameOverride) {
   let lastAppliedIcon = null;
 
   const applyServerIcon = (src) => {
-    if (!serverIconElement) return;
+    if (!serverIconElement || !isCurrent()) return;
     const nextSrc = src || defaultIconSrc;
     if (lastAppliedIcon === nextSrc) return;
     serverIconElement.src = nextSrc;
@@ -133,9 +155,10 @@ async function setStatus(opt, displayNameOverride) {
   };
 
   const applyOfflineState = () => {
-    statusServerElement.classList.add('red');
+    if (!isCurrent()) return;
+    statusServerElement.classList.add('offline');
     statusServerElement.innerHTML = `Server - 0 ms`;
-    document.querySelector('.status-player-count').classList.add('red');
+    document.querySelector('.status-player-count').classList.add('offline');
     playersOnline.innerHTML = '0';
     applyServerIcon();
   };
@@ -154,7 +177,7 @@ async function setStatus(opt, displayNameOverride) {
   if (ip) {
     fetchServerIconByIp(ip, port)
       .then((icon) => {
-        if (icon && currentToken === statusPollToken) {
+        if (icon && isCurrent()) {
           resolvedExternalIcon = icon;
           applyServerIcon(icon);
         }
@@ -163,14 +186,14 @@ async function setStatus(opt, displayNameOverride) {
   }
   let status = new Status(ip, port);
   const pollStatus = async () => {
-    if (currentToken !== statusPollToken) return;
+    if (!isCurrent()) return;
 
     let statusServer = await status
       .getStatus()
       .then((res) => res)
       .catch((err) => ({ error: err }));
 
-    if (currentToken !== statusPollToken) return;
+    if (!isCurrent()) return;
 
     if (!statusServer.error) {
       let totalPing = 0;
@@ -182,8 +205,10 @@ async function setStatus(opt, displayNameOverride) {
       let avgPing = totalPing / attempts;
       let adjustedPing = Math.max(0, Math.round(avgPing * 0.25));
 
-      statusServerElement.classList.remove('red');
-      document.querySelector('.status-player-count').classList.remove('red');
+      statusServerElement.classList.remove('offline');
+      document
+        .querySelector('.status-player-count')
+        .classList.remove('offline');
       statusServerElement.innerHTML = `Online - ${adjustedPing} ms`;
       playersOnline.innerHTML = statusServer.playersConnect;
       if (resolvedExternalIcon) {
@@ -197,7 +222,7 @@ async function setStatus(opt, displayNameOverride) {
       applyOfflineState();
     }
 
-    if (currentToken === statusPollToken) {
+    if (isCurrent()) {
       setTimeout(pollStatus, 2500);
     }
   };
@@ -250,5 +275,6 @@ export {
   accountSelect as accountSelect,
   slider as Slider,
   pkg as pkg,
-  setStatus as setStatus
+  setStatus as setStatus,
+  setStatusTarget as setStatusTarget
 };
