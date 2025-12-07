@@ -1,17 +1,73 @@
 .login .container {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
+    width: 100%;
+    padding: 0;
+    isolation: isolate;
+}
+
+.login .container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 38%),
+        radial-gradient(circle at 78% 8%, rgba(114, 137, 218, 0.25) 0%, rgba(114, 137, 218, 0) 50%),
+        linear-gradient(150deg, rgba(4, 7, 11, 0.85) 0%, rgba(5, 8, 13, 0.65) 65%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 0;
+    pointer-events: none;
 }
 
 .login-tabs {
-    position: absolute;
-    padding: 15px;
-    background: var(--background);
-    border-radius: 15px;
+    position: relative;
+    transform: none;
+    width: min(440px, 90vw);
+    padding: 2.5rem 3rem 2.25rem;
+    border-radius: 26px;
     text-align: center;
-    min-width: 40%;
+    color: var(--color);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 30px 62px rgba(0, 0, 0, 0.58);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    isolation: isolate;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.login-tabs::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 65%);
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.login-tabs::after {
+    content: '';
+    position: absolute;
+    top: -25%;
+    left: -15%;
+    width: 140%;
+    height: 60%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 70%);
+    filter: blur(4px);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: -1;
 }
 
 .login-home,
@@ -22,30 +78,127 @@
 }
 
 .login-text {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.35rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    text-transform: uppercase;
+}
+
+.input-login {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.input-login input,
+.A2F {
+    width: 100%;
+    color: var(--color);
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 0.75rem 1.1rem;
+    font-size: 1rem;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.3s ease, box-shadow 0.35s ease, background 0.3s ease;
+}
+
+.input-login input::placeholder,
+.A2F::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-login input:focus,
+.A2F:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.32);
+    box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.35), inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.login-options {
+    display: flex;
+    justify-content: center;
+    gap: 0.85rem;
+    width: 100%;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
 }
 
 .connect,
 .cancel {
-    background: var(--element-color);
-    color: var(--color);
-    border: solid 2px var(--element-color);
-    border-radius: 10px;
-    padding: 0.3rem 4rem;
-    font-size: inherit;
-    font-weight: bold;
-    margin: 15px 10px;
-    cursor: hand;
+    flex: 1 1 45%;
+    min-width: 140px;
+    border-radius: 14px;
+    padding: 0.85rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.35s ease, filter 0.35s ease, border-color 0.35s ease, background 0.35s ease;
 }
 
-.input-login .email,
-.input-login .password,
-.A2F {
+.connect {
+    background: linear-gradient(145deg, #2edc68 0%, var(--element-color) 100%);
+    color: #091204;
+    border-color: rgba(0, 0, 0, 0);
+    box-shadow: 0 12px 26px rgba(26, 199, 7, 0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.cancel {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
     color: var(--color);
-    background: none;
-    border: solid 3px var(--element-color);
-    border-radius: 10px;
-    width: 50%;
-    padding: 0.4rem 1rem;
-    margin-top: 10px;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+@media (hover: hover) {
+    .connect:hover,
+    .cancel:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.05);
+        box-shadow: 0 22px 46px rgba(0, 0, 0, 0.55);
+    }
+
+    .connect:hover {
+        box-shadow: 0 24px 52px rgba(26, 199, 7, 0.4);
+    }
+
+    .cancel:hover {
+        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.connect:active,
+.cancel:active {
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+    filter: brightness(0.95);
+}
+
+.connect:focus-visible,
+.cancel:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.5), 0 20px 42px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 520px) {
+    .login-tabs {
+        width: min(95vw, 420px);
+        padding: 2rem;
+    }
+
+    .connect,
+    .cancel {
+        min-width: 100%;
+    }
 }
