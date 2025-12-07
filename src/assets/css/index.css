@@ -3,7 +3,7 @@
 
 body {
     background-color: var(--background);
-    font-family: "HelveticaNeue";
+    font-family: var(--font-family-base);
     letter-spacing: 0px;
 }
 
@@ -36,7 +36,7 @@ img {
     top: 289px;
     left: 0px;
     width: 400px;
-    font: normal normal bold 18px/28px HelveticaNeue;
+    font: normal normal bold 18px/28px var(--font-family-base);
     text-align: center;
     letter-spacing: 0px;
     transition: opacity 1.5s;
@@ -55,13 +55,13 @@ img {
     width: 400px;
     text-align: center;
     transition: opacity 1.5s;
-    font: normal normal normal 13px/16px HelveticaNeue;
+    font: normal normal normal 13px/16px var(--font-family-base);
     color: var(--color);
     opacity: 0;
 }
 
 .splash-author .author {
-    font: normal normal bold 13px/16px HelveticaNeue;
+    font: normal normal bold 13px/16px var(--font-family-base);
 }
 
 .splash-author.opacity {
@@ -75,7 +75,7 @@ img {
     width: 400px;
     text-align: center;
     transition: opacity 1.5s;
-    font: normal normal bold 18px/28px HelveticaNeue;
+    font: normal normal bold 18px/28px var(--font-family-base);
     color: var(--color);
     opacity: 0;
 }
@@ -85,7 +85,7 @@ img {
     left: 25%;
     margin-top: 20px;
     width: 200px;
-    font: normal normal bold 20px / 40px HelveticaNeue;
+    font: normal normal bold 20px / 40px var(--font-family-base);
     color: var(--color);
     border: 2px solid var(--color);
     border-radius: 15px;
