@@ -32,12 +32,14 @@ let consoleState = {
   meta: {}
 };
 
-function normalizeConsoleMessage(value) {
-  if (value === null || typeof value === 'undefined') return '';
+const normalizeConsoleMessage = (value) => {
+  if (value == null) return '';
   if (Buffer.isBuffer(value)) return value.toString('utf8');
+
   if (typeof value === 'object' && typeof value.message === 'string') {
     return value.message;
   }
+
   if (typeof value === 'object') {
     try {
       return JSON.stringify(value);
@@ -45,15 +47,17 @@ function normalizeConsoleMessage(value) {
       return String(value);
     }
   }
-  return String(value);
-}
 
-function dispatchConsoleLog(entry = {}) {
+  return String(value);
+};
+
+const dispatchConsoleLog = (entry = {}) => {
+  const rawMessage = entry.message ?? entry.text ?? '';
   const normalized = {
-    message: normalizeConsoleMessage(entry.message ?? entry.text ?? ''),
-    level: entry.level || entry.type || 'info',
-    source: entry.source || 'launcher',
-    timestamp: entry.timestamp || Date.now()
+    message: normalizeConsoleMessage(rawMessage),
+    level: entry.level ?? entry.type ?? 'info',
+    source: entry.source ?? 'launcher',
+    timestamp: entry.timestamp ?? Date.now()
   };
 
   consoleLogs.push(normalized);
@@ -61,16 +65,15 @@ function dispatchConsoleLog(entry = {}) {
     consoleLogs.splice(0, consoleLogs.length - CONSOLE_LOG_LIMIT);
   }
 
-  const win = ConsoleWindow.getWindow();
-  if (win) win.webContents.send('console-log', normalized);
-}
+  ConsoleWindow.getWindow()?.webContents.send('console-log', normalized);
+};
 
-function dispatchConsoleState(patch = {}) {
+const dispatchConsoleState = (patch = {}) => {
   const phase = patch.phase || patch.status || consoleState.phase;
   const label = patch.label || consolePhaseLabels[phase] || consoleState.label;
   const meta = {
-    ...consoleState.meta,
-    ...patch.meta
+    ...(consoleState.meta ?? {}),
+    ...(patch.meta ?? {})
   };
 
   consoleState = {
@@ -81,27 +84,32 @@ function dispatchConsoleState(patch = {}) {
     meta
   };
 
-  const win = ConsoleWindow.getWindow();
-  if (win) win.webContents.send('console-state', consoleState);
-}
+  ConsoleWindow.getWindow()?.webContents.send('console-state', consoleState);
+};
 
-let dev = process.env.NODE_ENV === 'dev';
+const dev = process.env.NODE_ENV === 'dev';
 
 if (dev) {
-  let appPath = path.resolve('./data/Launcher').replace(/\\/g, '/');
-  let appdata = path.resolve('./data').replace(/\\/g, '/');
+  const appPath = path.resolve('./data/Launcher').replace(/\\/g, '/');
+  const appdata = path.resolve('./data').replace(/\\/g, '/');
+
   if (!fs.existsSync(appPath)) fs.mkdirSync(appPath, { recursive: true });
   if (!fs.existsSync(appdata)) fs.mkdirSync(appdata, { recursive: true });
+
   app.setPath('userData', appPath);
   app.setPath('appData', appdata);
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
-else
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
   app.whenReady().then(() => {
-    if (dev) return MainWindow.createWindow();
+    if (dev) {
+      return MainWindow.createWindow();
+    }
     UpdateWindow.createWindow();
   });
+}
 
 ipcMain.on('main-window-open', () => MainWindow.createWindow());
 ipcMain.on('main-window-dev-tools', () =>
@@ -112,7 +120,7 @@ ipcMain.on('main-window-dev-tools-close', () =>
 );
 ipcMain.on('main-window-close', () => MainWindow.destroyWindow());
 ipcMain.on('main-window-reload', () => MainWindow.getWindow().reload());
-ipcMain.on('main-window-progress', (event, options) =>
+ipcMain.on('main-window-progress', (_event, options) =>
   MainWindow.getWindow().setProgressBar(options.progress / options.size)
 );
 ipcMain.on('main-window-progress-reset', () =>
@@ -127,7 +135,7 @@ ipcMain.on('update-window-close', () => UpdateWindow.destroyWindow());
 ipcMain.on('update-window-dev-tools', () =>
   UpdateWindow.getWindow().webContents.openDevTools({ mode: 'detach' })
 );
-ipcMain.on('update-window-progress', (event, options) =>
+ipcMain.on('update-window-progress', (_event, options) =>
   UpdateWindow.getWindow().setProgressBar(options.progress / options.size)
 );
 ipcMain.on('update-window-progress-reset', () =>
@@ -138,37 +146,41 @@ ipcMain.on('update-window-progress-load', () =>
 );
 
 ipcMain.handle('path-user-data', () => app.getPath('userData'));
-ipcMain.handle('appData', (e) => app.getPath('appData'));
+ipcMain.handle('appData', () => app.getPath('appData'));
 
 ipcMain.on('main-window-maximize', () => {
-  if (MainWindow.getWindow().isMaximized()) {
-    MainWindow.getWindow().unmaximize();
+  const window = MainWindow.getWindow();
+  if (!window) return;
+
+  if (window.isMaximized()) {
+    window.unmaximize();
   } else {
-    MainWindow.getWindow().maximize();
+    window.maximize();
   }
 });
 
-ipcMain.on('main-window-hide', () => MainWindow.getWindow().hide());
-ipcMain.on('main-window-show', () => MainWindow.getWindow().show());
+ipcMain.on('main-window-hide', () => MainWindow.getWindow()?.hide());
+ipcMain.on('main-window-show', () => MainWindow.getWindow()?.show());
 
-ipcMain.on('console-window-open', (event, options = {}) => {
+ipcMain.on('console-window-open', (_event, options = {}) => {
   const win = ConsoleWindow.createWindow();
-  if (options.focus !== false && win) win.focus();
+  if (options.focus !== false) win?.focus();
   if (options.meta) dispatchConsoleState({ meta: options.meta });
 });
 
 ipcMain.on('console-window-request-close', () => ConsoleWindow.destroyWindow());
 ipcMain.on('console-window-close', () => ConsoleWindow.destroyWindow());
 
-ipcMain.on('console-window-log', (_, payload) => dispatchConsoleLog(payload));
-ipcMain.on('console-window-status', (_, payload) =>
-  dispatchConsoleState(payload)
-);
+ipcMain.on('console-window-log', (_event, payload) => {
+  dispatchConsoleLog(payload);
+});
+ipcMain.on('console-window-status', (_event, payload) => {
+  dispatchConsoleState(payload);
+});
 
 ipcMain.on('console-window-clear', () => {
   consoleLogs = [];
-  const win = ConsoleWindow.getWindow();
-  if (win) win.webContents.send('console-clear');
+  ConsoleWindow.getWindow()?.webContents.send('console-clear');
 });
 
 ipcMain.handle('console-window-initial-state', () => ({
@@ -176,39 +188,35 @@ ipcMain.handle('console-window-initial-state', () => ({
   state: consoleState
 }));
 
-ipcMain.handle('Microsoft-window', async (_, client_id) => {
-  return await new Microsoft(client_id).getAuth();
-});
+ipcMain.handle('Microsoft-window', async (_event, clientId) =>
+  new Microsoft(clientId).getAuth()
+);
 
-ipcMain.handle('is-dark-theme', (_, theme) => {
+ipcMain.handle('is-dark-theme', (_event, theme) => {
   if (theme === 'dark') return true;
   if (theme === 'light') return false;
   return nativeTheme.shouldUseDarkColors;
 });
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => {
+  app.quit();
+});
 
 autoUpdater.autoDownload = false;
 
 ipcMain.handle('update-app', async () => {
-  return await new Promise(async (resolve, reject) => {
-    autoUpdater
-      .checkForUpdates()
-      .then((res) => {
-        resolve(res);
-      })
-      .catch((error) => {
-        reject({
-          error: true,
-          message: error
-        });
-      });
-  });
+  try {
+    return await autoUpdater.checkForUpdates();
+  } catch (error) {
+    return {
+      error: true,
+      message: error
+    };
+  }
 });
 
 autoUpdater.on('update-available', () => {
-  const updateWindow = UpdateWindow.getWindow();
-  if (updateWindow) updateWindow.webContents.send('updateAvailable');
+  UpdateWindow.getWindow()?.webContents.send('updateAvailable');
 });
 
 ipcMain.on('start-update', () => {
@@ -216,8 +224,7 @@ ipcMain.on('start-update', () => {
 });
 
 autoUpdater.on('update-not-available', () => {
-  const updateWindow = UpdateWindow.getWindow();
-  if (updateWindow) updateWindow.webContents.send('update-not-available');
+  UpdateWindow.getWindow()?.webContents.send('update-not-available');
 });
 
 autoUpdater.on('update-downloaded', () => {
@@ -225,12 +232,9 @@ autoUpdater.on('update-downloaded', () => {
 });
 
 autoUpdater.on('download-progress', (progress) => {
-  const updateWindow = UpdateWindow.getWindow();
-  if (updateWindow)
-    updateWindow.webContents.send('download-progress', progress);
+  UpdateWindow.getWindow()?.webContents.send('download-progress', progress);
 });
 
 autoUpdater.on('error', (err) => {
-  const updateWindow = UpdateWindow.getWindow();
-  if (updateWindow) updateWindow.webContents.send('error', err);
+  UpdateWindow.getWindow()?.webContents.send('error', err);
 });
