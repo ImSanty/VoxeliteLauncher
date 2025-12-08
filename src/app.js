@@ -89,6 +89,52 @@ const dispatchConsoleState = (patch = {}) => {
 
 const dev = process.env.NODE_ENV === 'dev';
 
+const DATABASE_FILENAME = 'Databases.db';
+
+const ensureDatabaseDir = (source = 'startup') => {
+  try {
+    const userDataDir = app.getPath('userData');
+    const legacyDir = path.join(userDataDir, 'databases');
+    const legacyFile = path.join(legacyDir, DATABASE_FILENAME);
+    const targetDir = userDataDir;
+    const targetFile = path.join(targetDir, DATABASE_FILENAME);
+
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+
+    if (fs.existsSync(legacyFile) && !fs.existsSync(targetFile)) {
+      try {
+        fs.copyFileSync(legacyFile, targetFile);
+      } catch (migrationError) {
+        console.error(
+          '[database-path] Failed to migrate legacy database',
+          migrationError
+        );
+      }
+    }
+
+    try {
+      if (fs.existsSync(legacyDir)) {
+        const remaining = fs.readdirSync(legacyDir);
+        if (!remaining.length) {
+          fs.rmSync(legacyDir, { recursive: true, force: true });
+        }
+      }
+    } catch (cleanupError) {
+      console.error(
+        '[database-path] Unable to clean legacy directory',
+        cleanupError
+      );
+    }
+
+    return targetDir;
+  } catch (error) {
+    console.error(`[database-path] Failed via ${source}:`, error);
+    throw error;
+  }
+};
+
 if (dev) {
   const appPath = path.resolve('./data/Launcher').replace(/\\/g, '/');
   const appdata = path.resolve('./data').replace(/\\/g, '/');
@@ -99,6 +145,8 @@ if (dev) {
   app.setPath('userData', appPath);
   app.setPath('appData', appdata);
 }
+
+ensureDatabaseDir('startup');
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -147,6 +195,7 @@ ipcMain.on('update-window-progress-load', () =>
 
 ipcMain.handle('path-user-data', () => app.getPath('userData'));
 ipcMain.handle('appData', () => app.getPath('appData'));
+ipcMain.handle('database-path', () => ensureDatabaseDir('ipc-invoke'));
 
 ipcMain.on('main-window-maximize', () => {
   const window = MainWindow.getWindow();
