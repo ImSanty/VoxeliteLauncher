@@ -1,3 +1,11 @@
+.settings {
+    font-family: var(--font-family-base);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--color);
+}
+
 .settings .container {
     display: flex;
     height: 100%;
@@ -6,16 +14,24 @@
 .nav-settings {
     width: 22%;
     height: 100%;
-    background: var(--background-transparent);
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
     display: flex;
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: 1.1rem;
+    padding: 2rem 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(18px);
 }
 
 .nav-settings p {
-    font-size: 60%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
 }
 
 .nav-box {
@@ -29,22 +45,34 @@
     background: var(--element-color);
     border: solid 3px var(--element-color);
     margin: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, filter 0.35s ease;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
 }
 
 .nav-settings-btn {
-    font-size: 50%;
-    background: var(--shadow);
-    padding: 5px 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+    padding: 0.4rem 1rem;
     border-radius: 10px;
     width: 70%;
     text-align: center;
     margin: 0.5rem 0;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 15px 34px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, border-color 0.35s ease, filter 0.35s ease;
 }
 
 .active-settings-BTN {
     background: var(--element-color);
     border: solid 3px var(--element-color);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.5);
 }
 
 .container-settings {
@@ -61,15 +89,21 @@
 }
 
 .settings-elements-box {
-    background: var(--background-transparent);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
     width: 80%;
     border-radius: 8px;
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 2rem;
     margin: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 25px 48px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
 }
 
 .setting-text {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-weight: 400;
+    max-width: 62ch;
 }
 
 .active-container-settings {
@@ -82,13 +116,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     margin: 1rem 0;
     padding: 0.5rem 2rem;
     border-radius: 8px;
     text-align: center;
-    background: var(--background-transparent);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
     color: var(--color);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(16px);
 }
 
 .settings-elements {
@@ -106,6 +146,80 @@
     justify-content: space-evenly;
 }
 
+.credits-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.credit-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: transform 0.35s ease, box-shadow 0.4s ease, border-color 0.35s ease, filter 0.35s ease;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.credit-item:focus {
+    outline: none;
+}
+
+.credit-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0.5rem;
+}
+
+.credit-symbol {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: var(--svg-color);
+}
+
+.credit-info {
+    flex: 1;
+}
+
+.credit-label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.credit-description {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    opacity: 0.8;
+}
+
+.credit-handle {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.credit-arrow {
+    font-size: 1.2rem;
+    color: var(--element-color);
+}
+
 /*******************************************************************************
  *                                                                             *
  * account tab                                                                 *
@@ -120,7 +234,7 @@
 }
 
 .account {
-    background: var(--background-transparent);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -128,6 +242,10 @@
     height: calc(100px - 8px);
     margin: 1rem;
     border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    transition: transform 0.35s ease, box-shadow 0.4s ease, border-color 0.35s ease, filter 0.35s ease;
+    backdrop-filter: blur(16px);
 }
 
 .account-select {
@@ -192,7 +310,7 @@
 .delete-profile {
     width: 60px;
     height: 60px;
-    background: var(--background-transparent);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     border-radius: 10px;
     font-size: 1.8rem;
     display: flex;
@@ -200,6 +318,9 @@
     align-items: center;
     color: #ff2c2c;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, border-color 0.35s ease, filter 0.35s ease;
 }
 
 .delete-profile-icon {
@@ -218,6 +339,16 @@
     height: 18px;
     width: 50%;
     user-select: none;
+}
+
+.memory-slider .slider-touch-left {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.memory-slider .slider-touch-left span,
+.memory-slider .slider-touch-left span:after {
+    display: none;
 }
 
 .slider-touch-left,
@@ -246,7 +377,7 @@
 .slider-touch-right span:after {
     content: attr(value);
     color: var(--element-color);
-    font: normal normal bold 12px/18px HelveticaNeue;
+    font: 600 12px/18px var(--font-family-base);
     white-space: nowrap;
     pointer-events: none;
     position: absolute;
@@ -279,16 +410,20 @@
 
 .ram-info-block {
     font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.5;
     color: var(--color);
 }
 
 .java-path-input-text {
-    background: var(--shadow);
+    background: rgba(0, 0, 0, 0.4);
     border: none;
     color: var(--color);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     width: 65%;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.45);
+    transition: box-shadow 0.3s ease;
 }
 
 .java-path-input-file {
@@ -306,6 +441,8 @@
     border-radius: 8px;
     margin: 0 0.3rem;
     cursor: pointer;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, filter 0.35s ease;
 }
 
 /*******************************************************************************
@@ -319,7 +456,7 @@
 }
 
 .input-resolution {
-    background: var(--shadow);
+    background: rgba(0, 0, 0, 0.4);
     border: none;
     color: var(--color);
     padding: 0.5rem 1rem;
@@ -343,6 +480,8 @@
     border-radius: 8px;
     margin: 0 1rem;
     cursor: pointer;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, filter 0.35s ease;
 }
 
 /*******************************************************************************
@@ -352,7 +491,7 @@
  ******************************************************************************/
 
 .input-max-files {
-    background: var(--shadow);
+    background: rgba(0, 0, 0, 0.4);
     border: none;
     color: var(--color);
     padding: 0.5rem 1rem;
@@ -367,6 +506,8 @@
     background: var(--element-color);
     border-radius: 6px;
     cursor: pointer;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, filter 0.35s ease;
 }
 
 .theme-btn {
@@ -374,6 +515,8 @@
     padding: calc(0.1rem + 4px) calc(2rem + 4px);
     border-radius: 8px;
     cursor: pointer;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, filter 0.35s ease;
 }
 
 .theme-btn-clair {
@@ -395,16 +538,141 @@
     background: var(--element-color);
 }
 
-.close-btn {
+
+.close-box,
+.console-box {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.close-btn,
+.console-btn {
     font-size: 1rem;
-    background: var(--shadow);
-    width: 230;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     border-radius: 10px;
     padding: 1rem;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 15px 34px rgba(0, 0, 0, 0.45);
+    transition: transform 0.35s ease, box-shadow 0.4s ease, border-color 0.35s ease, filter 0.35s ease;
 }
 
-.active-close {
+.active-close,
+.active-console {
     background: var(--element-color);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * interactive states                                                          *
+ *                                                                             *
+ ******************************************************************************/
+
+@media (hover: hover) {
+    .nav-settings-btn:hover,
+    .nav-box #save:hover,
+    .account:hover,
+    .delete-profile:hover,
+    .java-path-btn:hover,
+    .size-btn:hover,
+    .max-files-btn:hover,
+    .theme-btn:hover,
+    .close-btn:hover,
+    .console-btn:hover,
+    .credit-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 22px 46px rgba(0, 0, 0, 0.55);
+        filter: brightness(1.05);
+    }
+
+    .account:hover {
+        box-shadow: none;
+    }
+}
+
+.nav-settings-btn:active,
+.nav-box #save:active,
+.account:active,
+.delete-profile:active,
+.java-path-btn:active,
+.size-btn:active,
+.max-files-btn:active,
+.theme-btn:active,
+.close-btn:active,
+.console-btn:active,
+.credit-item:active {
+    transform: translateY(2px) scale(0.96);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+    filter: brightness(0.95);
+}
+
+.account:active {
+    box-shadow: none;
+}
+
+.nav-settings-btn:focus-visible,
+.nav-box #save:focus-visible,
+.account:focus-visible,
+.delete-profile:focus-visible,
+.java-path-btn:focus-visible,
+.size-btn:focus-visible,
+.max-files-btn:focus-visible,
+.theme-btn:focus-visible,
+.close-btn:focus-visible,
+.credit-item:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.55), 0 24px 48px rgba(0, 0, 0, 0.55);
+}
+
+.java-path-input-text:focus-visible,
+.input-resolution:focus-visible,
+.input-max-files:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-settings-btn,
+    .nav-box #save,
+    .account,
+    .delete-profile,
+    .java-path-btn,
+    .size-btn,
+    .max-files-btn,
+    .theme-btn,
+    .close-btn {
+        transition: none;
+    }
+
+    .nav-settings-btn:hover,
+    .nav-box #save:hover,
+    .account:hover,
+    .delete-profile:hover,
+    .java-path-btn:hover,
+    .size-btn:hover,
+    .max-files-btn:hover,
+    .theme-btn:hover,
+    .close-btn:hover,
+    .nav-settings-btn:active,
+    .nav-box #save:active,
+    .account:active,
+    .delete-profile:active,
+    .java-path-btn:active,
+    .size-btn:active,
+    .max-files-btn:active,
+    .theme-btn:active,
+    .close-btn:active {
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
 }

@@ -12,7 +12,8 @@ import {
   accountSelect,
   addAccount,
   config,
-  setStatus
+  setStatus,
+  setStatusTarget
 } from '../utils.js';
 
 class Login {
@@ -40,7 +41,7 @@ class Login {
     let popupLogin = new popup();
     let loginHome = document.querySelector('.login-home');
     let microsoftBtn = document.querySelector('.connect-home');
-    loginHome.style.display = 'block';
+    loginHome.style.display = 'flex';
 
     microsoftBtn.addEventListener('click', () => {
       popupLogin.openPopup({
@@ -77,7 +78,7 @@ class Login {
 
     let emailOffline = document.querySelector('.email-offline');
     let connectOffline = document.querySelector('.connect-offline');
-    loginOffline.style.display = 'block';
+    loginOffline.style.display = 'flex';
 
     connectOffline.addEventListener('click', async () => {
       if (emailOffline.value.length < 3) {
@@ -127,7 +128,7 @@ class Login {
     let AZauthConnectBTN = document.querySelector('.connect-AZauth');
     let AZauthCancelA2F = document.querySelector('.cancel-AZauth-A2F');
 
-    loginAZauth.style.display = 'block';
+    loginAZauth.style.display = 'flex';
 
     AZauthConnectBTN.addEventListener('click', async () => {
       PopupLogin.openPopup({
@@ -158,13 +159,13 @@ class Login {
         });
         return;
       } else if (AZauthConnect.A2F) {
-        loginAZauthA2F.style.display = 'block';
+        loginAZauthA2F.style.display = 'flex';
         loginAZauth.style.display = 'none';
         PopupLogin.closePopup();
 
         AZauthCancelA2F.addEventListener('click', () => {
           loginAZauthA2F.style.display = 'none';
-          loginAZauth.style.display = 'block';
+          loginAZauth.style.display = 'flex';
         });
 
         connectAZauthA2F.addEventListener('click', async () => {
@@ -226,7 +227,8 @@ class Login {
               (i) => i.whitelistActive == false
             );
             configClient.instance_selct = newInstanceSelect.name;
-            await setStatus(newInstanceSelect.status);
+            setStatusTarget(newInstanceSelect.name);
+            await setStatus(newInstanceSelect.status, newInstanceSelect.name);
           }
         }
       }

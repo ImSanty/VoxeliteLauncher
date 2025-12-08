@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="assets/css/console.css" />
+  <title>Voxelite Console</title>
+</head>
+
+<body>
+  <div class="console-shell">
+    <div class="console-drag-strip" aria-hidden="true">
+      <span class="drag-grip"></span>
+    </div>
+    <div class="console-header" data-drag-region>
+      <div class="console-title">
+        <span class="title-pill">Voxelite</span>
+        <div>
+          <strong>Consola de juego</strong>
+          <small class="status-text">Esperando lanzamiento...</small>
+        </div>
+      </div>
+      <div class="console-actions" role="toolbar">
+        <button class="toolbar-btn" data-action="copy" title="Copiar todo">
+          <span class="icon icon-copy"></span>
+        </button>
+        <button class="toolbar-btn" data-action="clear" title="Limpiar">
+          <span class="icon icon-clear"></span>
+        </button>
+        <button class="toolbar-btn" data-action="close" title="Cerrar">
+          <span class="icon icon-close"></span>
+        </button>
+      </div>
+    </div>
+    <div class="console-meta">
+      <div class="meta-chip" data-meta="instance">Instancia — <b>-</b></div>
+      <div class="meta-chip" data-meta="version">Versión — <b>-</b></div>
+      <div class="meta-chip" data-meta="account">Cuenta — <b>-</b></div>
+    </div>
+    <div class="console-status">
+      <span class="status-indicator"></span>
+      <p class="status-label">Sin actividad</p>
+    </div>
+    <div class="console-log" id="console-log"></div>
+  </div>
+  <script src="assets/js/console.js"></script>
+</body>
+
+</html>
