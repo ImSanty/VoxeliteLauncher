@@ -282,6 +282,26 @@ class Home {
       configClient?.launcher_config?.closeLauncher !== 'close-launcher';
     const consoleEnabled =
       (configClient?.launcher_config?.consoleMode || 'hidden') === 'window';
+    const devRuntimeEnv =
+      typeof process !== 'undefined' &&
+      (Boolean(process?.env?.ELECTRON_START_URL) ||
+        process?.env?.NODE_ENV === 'development');
+    const devToolsTracing = Boolean(
+      devRuntimeEnv || configClient?.launcher_config?.devtoolsTracing
+    );
+
+    const devTraceEvent = (label, payload) => {
+      if (!devToolsTracing) return;
+      try {
+        if (typeof payload === 'undefined') {
+          console.debug(`[voxelite-launcher] ${label}`);
+        } else {
+          console.debug(`[voxelite-launcher] ${label}`, payload);
+        }
+      } catch {
+        /* ignore console failures */
+      }
+    };
 
     const toConsoleString = (value) => {
       if (value === null || typeof value === 'undefined') return '';
@@ -307,9 +327,12 @@ class Home {
     };
 
     const consoleLog = (message, level = 'info', source = 'launcher') => {
-      if (!consoleEnabled) return;
       let output = toConsoleString(message);
       if (!output.trim()) return;
+      if (devToolsTracing) {
+        devTraceEvent('log', { source, level, message: output });
+      }
+      if (!consoleEnabled) return;
       sendConsole('console-window-log', {
         message: output,
         level,
@@ -319,6 +342,9 @@ class Home {
     };
 
     const consoleState = (state = {}) => {
+      if (devToolsTracing) {
+        devTraceEvent('status', state);
+      }
       if (!consoleEnabled) return;
       sendConsole('console-window-status', state);
     };
@@ -353,10 +379,18 @@ class Home {
     let infoStarting = document.querySelector('.info-starting-game-text');
     let progressBar = document.querySelector('.progress-bar');
 
+    const requestedTimeout = Number(
+      configClient?.launcher_config?.download_timeout_ms
+    );
+    const downloadTimeoutMs =
+      Number.isFinite(requestedTimeout) && requestedTimeout >= 60000
+        ? requestedTimeout
+        : 5 * 60 * 1000;
+
     let opt = {
       url: options.url,
       authenticator: authenticator,
-      timeout: 10000,
+      timeout: downloadTimeoutMs,
       path: `${await appdata()}/${
         process.platform == 'darwin'
           ? this.config.dataDirectory
@@ -394,6 +428,15 @@ class Home {
       }
     };
 
+    devTraceEvent('launch:options', {
+      instance: opt.instance,
+      version: opt.version,
+      loader: opt.loader?.type,
+      timeoutMs: opt.timeout,
+      parallelDownloads: opt.downloadFileMultiple,
+      keepLauncherVisible
+    });
+
     launch.Launch(opt);
 
     playInstanceBTN.style.display = 'none';
@@ -404,10 +447,59 @@ class Home {
     let lastProgressTick = { time: Date.now(), value: 0 };
     let lastPercent = 0;
     let lastSpeedBps = 0;
+    const speedSamples = [];
+    const maxSpeedSamples = 12;
     let lastEtaSeconds = null;
-    let currentPhase = 'download';
+    let currentPhase = 'preparing';
+    let preparingTicker = null;
+
+    const stopPreparingTicker = () => {
+      if (preparingTicker) {
+        clearInterval(preparingTicker);
+        preparingTicker = null;
+      }
+    };
+
+    const ensurePreparingTicker = () => {
+      if (preparingTicker) return;
+      preparingTicker = setInterval(() => {
+        if (currentPhase !== 'preparing') {
+          stopPreparingTicker();
+          return;
+        }
+        const label = updateLabel();
+        consoleState({ phase: 'preparing', label });
+      }, 500);
+    };
     const downloadLogKeys = new Set();
+    let lastDownloadEntry = null;
     const baseGamePath = opt.path.replace(/\\/g, '/');
+    const recordSpeedSample = (value) => {
+      if (!Number.isFinite(value) || value <= 0) {
+        return;
+      }
+      speedSamples.push(value);
+      if (speedSamples.length > maxSpeedSamples) {
+        speedSamples.shift();
+      }
+    };
+    const getSmoothedSpeed = () => {
+      if (!speedSamples.length) {
+        return null;
+      }
+      const total = speedSamples.reduce((sum, sample) => sum + sample, 0);
+      return total / speedSamples.length;
+    };
+    const getEffectiveSpeed = () => {
+      const smoothed = getSmoothedSpeed();
+      if (Number.isFinite(smoothed) && smoothed > 0) {
+        return smoothed;
+      }
+      if (Number.isFinite(lastSpeedBps) && lastSpeedBps > 0) {
+        return lastSpeedBps;
+      }
+      return null;
+    };
 
     const normalizeDownloadKey = (file) => {
       if (!file) return null;
@@ -445,32 +537,76 @@ class Home {
       return null;
     };
 
+    const summarizeDownloadFile = (file) => {
+      if (!file || typeof file !== 'object') {
+        return file ?? null;
+      }
+
+      return {
+        path:
+          typeof file.path === 'string' && file.path.trim()
+            ? file.path.trim()
+            : null,
+        name:
+          typeof file.name === 'string' && file.name.trim()
+            ? file.name.trim()
+            : null,
+        url:
+          typeof file.url === 'string' && file.url.trim()
+            ? file.url.trim()
+            : null,
+        size: Number.isFinite(file.size) && file.size >= 0 ? file.size : null,
+        type: file.type ?? null
+      };
+    };
+
     const updateLabel = () => {
+      const displaySpeed =
+        currentPhase === 'download' ? getEffectiveSpeed() : undefined;
+      const timestamp = Date.now();
       const label = buildDownloadLabel({
         phase: currentPhase,
         percent: lastPercent,
-        speedBps: currentPhase === 'download' ? lastSpeedBps : undefined,
-        etaSeconds: currentPhase === 'download' ? lastEtaSeconds : undefined
+        speedBps: displaySpeed,
+        etaSeconds: currentPhase === 'download' ? lastEtaSeconds : undefined,
+        timestamp
       });
       infoStarting.innerHTML = label;
       return label;
     };
 
+    ensurePreparingTicker();
+    updateLabel();
+
     updateLabel();
     ipcRenderer.send('main-window-progress-load');
 
     launch.on('download', ({ status, file }) => {
-      if (status !== 'start') return;
       const key = normalizeDownloadKey(file);
-      if (key) {
-        if (downloadLogKeys.has(key)) {
-          return;
-        }
-        downloadLogKeys.add(key);
-      }
       const label = formatDownloadLabel(file);
-      if (!label) return;
-      consoleLog(`[Descarga] ${label}`, 'info');
+      if (status === 'start') {
+        if (key) {
+          if (downloadLogKeys.has(key)) {
+            return;
+          }
+          downloadLogKeys.add(key);
+        }
+        lastDownloadEntry = { file, label };
+        devTraceEvent('download:start', {
+          label,
+          file: summarizeDownloadFile(file)
+        });
+        if (!label) return;
+        consoleLog(`[Descarga] ${label}`, 'info');
+        return;
+      }
+
+      if (status === 'end') {
+        devTraceEvent('download:end', {
+          label,
+          file: summarizeDownloadFile(file)
+        });
+      }
     });
 
     launch.on('extract', (extract) => {
@@ -478,9 +614,11 @@ class Home {
       consoleState({ phase: 'preparing', label: 'Extrayendo librerías...' });
       consoleLog(`[Extract] ${toConsoleString(extract)}`, 'info');
       console.log(extract);
+      devTraceEvent('extract', extract);
     });
 
-    launch.on('progress', (progress, size) => {
+    launch.on('progress', (progress, size, element) => {
+      stopPreparingTicker();
       currentPhase = 'download';
 
       const percent = size > 0 ? (progress / size) * 100 : 0;
@@ -493,33 +631,53 @@ class Home {
         derivedSpeed = deltaBytes / deltaTime;
       }
 
-      const remainingBytes = size - progress;
-      const derivedEta =
-        derivedSpeed > 0 ? remainingBytes / derivedSpeed : null;
-
       lastProgressTick = { time: now, value: progress };
       lastPercent = percent;
 
       if (Number.isFinite(derivedSpeed) && derivedSpeed > 0) {
+        recordSpeedSample(derivedSpeed);
         lastSpeedBps = derivedSpeed;
       }
+
+      const effectiveSpeed = getEffectiveSpeed();
+      const remainingBytes = size - progress;
+      const derivedEta =
+        effectiveSpeed && effectiveSpeed > 0
+          ? remainingBytes / effectiveSpeed
+          : null;
 
       if (Number.isFinite(derivedEta) && derivedEta >= 0) {
         lastEtaSeconds = derivedEta;
       }
 
       const label = updateLabel();
+      devTraceEvent('progress', {
+        downloaded: progress,
+        size,
+        percent,
+        label,
+        file: summarizeDownloadFile(element),
+        speed: effectiveSpeed
+      });
       consoleState({ phase: 'download', label });
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
       progressBar.max = size;
     });
 
-    launch.on('check', (progress, size) => {
+    launch.on('check', (progress, size, element) => {
+      stopPreparingTicker();
       currentPhase = 'verify';
       const percent = size > 0 ? (progress / size) * 100 : 0;
       lastPercent = percent;
       const label = updateLabel();
+      devTraceEvent('verify:progress', {
+        verified: progress,
+        size,
+        percent,
+        label,
+        file: summarizeDownloadFile(element)
+      });
       consoleState({ phase: 'verifying', label });
       ipcRenderer.send('main-window-progress', { progress, size });
       progressBar.value = progress;
@@ -533,28 +691,35 @@ class Home {
           const label = updateLabel();
           consoleState({ phase: 'download', label });
         }
+        devTraceEvent('download:eta', { seconds: time });
       }
     });
 
     launch.on('speed', (speed) => {
       if (Number.isFinite(speed) && speed > 0) {
+        recordSpeedSample(speed);
         lastSpeedBps = speed;
         if (currentPhase === 'download') {
           const label = updateLabel();
           consoleState({ phase: 'download', label });
         }
+        devTraceEvent('download:speed', { bytesPerSecond: speed });
       }
     });
 
     launch.on('patch', (patch) => {
+      currentPhase = 'preparing';
+      ensurePreparingTicker();
       console.log(patch);
       ipcRenderer.send('main-window-progress-load');
       infoStarting.innerHTML = `Parche en proceso...`;
       consoleState({ phase: 'preparing', label: 'Aplicando parches...' });
       consoleLog(`[Patch] ${toConsoleString(patch)}`, 'info');
+      devTraceEvent('patch', patch);
     });
 
     launch.on('data', (e) => {
+      stopPreparingTicker();
       progressBar.style.display = 'none';
       progressBar.classList.remove('progress-bar-active');
       if (!keepLauncherVisible) {
@@ -568,9 +733,11 @@ class Home {
       consoleState({ phase: 'running', label: 'Minecraft en ejecución' });
       consoleLog(e, 'stdout', 'game');
       console.log(e);
+      devTraceEvent('game:data', toConsoleString(e));
     });
 
     launch.on('close', (code) => {
+      stopPreparingTicker();
       if (configClient.launcher_config.closeLauncher == 'close-launcher') {
         ipcRenderer.send('main-window-show');
       }
@@ -585,6 +752,7 @@ class Home {
         'status',
         'game'
       );
+      devTraceEvent('game:close', { code });
       consoleState({
         phase: 'closed',
         label:
@@ -596,11 +764,13 @@ class Home {
     });
 
     launch.on('error', (err) => {
-      let popupError = new popup();
+      stopPreparingTicker();
+      const popupError = new popup();
+      const formattedError = formatLauncherError(err, lastDownloadEntry);
 
       popupError.openPopup({
         title: 'Error',
-        content: err.error,
+        content: formattedError.html,
         color: 'red',
         options: true
       });
@@ -614,12 +784,20 @@ class Home {
       progressBar.classList.remove('progress-bar-active');
       infoStarting.innerHTML = `Verificando`;
       new logger(pkg.name, '#7289da');
-      consoleLog(err?.error || err, 'error', 'launcher');
+      consoleLog(
+        formattedError.debug ?? toConsoleString(err),
+        'error',
+        'launcher'
+      );
+      devTraceEvent('launch:error', {
+        error: serializeError(err),
+        lastDownload: summarizeDownloadFile(lastDownloadEntry?.file)
+      });
       consoleState({
         phase: 'error',
-        label: err?.error || 'Error durante el lanzamiento'
+        label: formattedError.rawMessage || 'Error durante el lanzamiento'
       });
-      console.log(err);
+      console.error(err);
     });
   }
 
@@ -646,7 +824,19 @@ class Home {
   }
 }
 
-function buildDownloadLabel({ phase, percent = 0, speedBps, etaSeconds }) {
+function buildDownloadLabel({
+  phase,
+  percent = 0,
+  speedBps,
+  etaSeconds,
+  timestamp = Date.now()
+}) {
+  if (phase === 'preparing') {
+    const dotCount = (Math.floor(timestamp / 500) % 3) + 1 || 1;
+    const dots = '.'.repeat(dotCount);
+    return `Analizando archivos${dots}`;
+  }
+
   const safePhase = phase === 'verify' ? 'Verificando' : 'Descargando';
   const boundedPercent = Math.max(0, Math.min(100, percent || 0));
   const extras = [];
@@ -708,6 +898,165 @@ function formatEta(seconds) {
 
   parts.push(`${secs}s`);
   return parts.join(' ');
+}
+
+function formatLauncherError(error, lastDownloadEntry) {
+  const segments = [];
+  const message = extractErrorMessage(error);
+
+  if (message) {
+    segments.push(message);
+  }
+
+  const code =
+    error?.code ||
+    error?.status ||
+    error?.response?.status ||
+    error?.cause?.code;
+
+  if (code) {
+    segments.push(`Código: ${code}`);
+  }
+
+  const fileLabel = describeDownloadEntry(lastDownloadEntry);
+
+  if (fileLabel) {
+    segments.push(`Archivo: ${fileLabel}`);
+  }
+
+  const url =
+    error?.url ||
+    error?.resource ||
+    error?.downloadURL ||
+    lastDownloadEntry?.file?.url;
+
+  if (url) {
+    segments.push(`URL: ${url}`);
+  }
+
+  const html = segments.length
+    ? segments.map((segment) => escapeHtml(segment)).join('<br/>')
+    : 'Se produjo un error durante la descarga.';
+
+  let debug = null;
+
+  try {
+    debug = JSON.stringify(
+      {
+        error: serializeError(error),
+        download: lastDownloadEntry?.file ?? null
+      },
+      null,
+      2
+    );
+  } catch {
+    debug = null;
+  }
+
+  return {
+    html,
+    rawMessage: message,
+    debug
+  };
+}
+
+function extractErrorMessage(error) {
+  if (!error && error !== 0) {
+    return null;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error?.error === 'string') {
+    return error.error;
+  }
+
+  if (typeof error?.message === 'string') {
+    return error.message;
+  }
+
+  if (typeof error === 'object') {
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+
+  return String(error);
+}
+
+function describeDownloadEntry(entry) {
+  if (!entry) {
+    return null;
+  }
+
+  if (entry.label) {
+    return entry.label;
+  }
+
+  const file = entry.file;
+
+  if (!file) {
+    return null;
+  }
+
+  if (typeof file.path === 'string' && file.path.trim()) {
+    return file.path.trim();
+  }
+
+  if (typeof file.name === 'string' && file.name.trim()) {
+    return file.name.trim();
+  }
+
+  if (typeof file.type === 'string' && file.type.trim()) {
+    return file.type.trim();
+  }
+
+  return null;
+}
+
+function serializeError(error) {
+  if (!error) {
+    return null;
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code ?? null
+    };
+  }
+
+  if (typeof error === 'object') {
+    try {
+      return JSON.parse(JSON.stringify(error));
+    } catch {
+      return Object.entries(error).reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {});
+    }
+  }
+
+  return { message: String(error) };
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 export default Home;
