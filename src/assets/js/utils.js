@@ -15,45 +15,44 @@ import popup from './utils/popup.js';
 import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
 
-async function setBackground(theme) {
-  if (typeof theme == 'undefined') {
-    let databaseLauncher = new database();
-    let configClient = await databaseLauncher.readData('configClient');
-    theme = configClient?.launcher_config?.theme || 'auto';
-    theme = await ipcRenderer.invoke('is-dark-theme', theme).then((res) => res);
+async function setBackground() {
+  const body = document.body;
+  body.classList.remove('dark', 'light');
+  if (!body.classList.contains('global')) {
+    body.classList.add('global');
   }
-  let background;
-  let body = document.body;
-  body.className = theme ? 'dark global' : 'light global';
-  if (
-    fs.existsSync(`${__dirname}/assets/images/background/easterEgg`) &&
-    Math.random() < 0.005
-  ) {
-    let backgrounds = fs.readdirSync(
-      `${__dirname}/assets/images/background/easterEgg`
-    );
-    let Background =
-      backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    background = `url(./assets/images/background/easterEgg/${Background})`;
-  } else if (
-    fs.existsSync(
-      `${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`
-    )
-  ) {
-    let backgrounds = fs.readdirSync(
-      `${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`
-    );
-    let Background =
-      backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${
-      theme ? 'dark' : 'light'
-    }/${Background})`;
+
+  let background = null;
+  const easterEggDir = `${__dirname}/assets/images/background/easterEgg`;
+  const defaultDir = `${__dirname}/assets/images/background/dark`;
+  const overlayLayers = [
+    'radial-gradient(circle at 18% 22%, var(--background-overlay-sheen) 0%, rgba(255, 255, 255, 0) 32%)',
+    'radial-gradient(circle at 82% 18%, rgba(114, 137, 218, 0.12) 0%, rgba(114, 137, 218, 0) 45%)',
+    'linear-gradient(160deg, var(--background-overlay-start), var(--background-overlay-end))'
+  ];
+
+  if (fs.existsSync(easterEggDir) && Math.random() < 0.005) {
+    const backgrounds = fs.readdirSync(easterEggDir);
+    if (backgrounds.length) {
+      const randomBackground =
+        backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      background = `${overlayLayers.join(
+        ', '
+      )}, url(./assets/images/background/easterEgg/${randomBackground})`;
+    }
+  } else if (fs.existsSync(defaultDir)) {
+    const backgrounds = fs.readdirSync(defaultDir);
+    if (backgrounds.length) {
+      const randomBackground =
+        backgrounds[Math.floor(Math.random() * backgrounds.length)];
+      background = `${overlayLayers.join(
+        ', '
+      )}, url(./assets/images/background/dark/${randomBackground})`;
+    }
   }
-  body.style.backgroundImage = background
-    ? background
-    : theme
-    ? '#000'
-    : '#fff';
+
+  body.style.backgroundImage = background || overlayLayers.join(', ');
+  body.style.backgroundColor = 'var(--background)';
   body.style.backgroundSize = 'cover';
 }
 
