@@ -154,6 +154,7 @@ input::-webkit-inner-spin-button {
 
 .popup-tab {
     width: min(460px, 90vw);
+    max-height: min(520px, 90vh);
     padding: 2rem 2.5rem 1.75rem;
     border-radius: 24px;
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -164,6 +165,9 @@ input::-webkit-inner-spin-button {
     position: relative;
     overflow: hidden;
     isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .popup-tab::before {
@@ -185,6 +189,29 @@ input::-webkit-inner-spin-button {
     margin-bottom: 1rem;
     padding-bottom: 0.65rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.popup-content {
+    flex: 1;
+    overflow: auto;
+    margin-right: -0.5rem;
+    padding-right: 0.5rem;
+    word-break: break-word;
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+.popup-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.popup-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+}
+
+.popup-content::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 .popup-options {
