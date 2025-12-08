@@ -14,6 +14,27 @@ import logger from './utils/logger.js';
 import popup from './utils/popup.js';
 import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
+import rpc from './utils/rpc.js';
+import presence from './utils/presence.js';
+
+let cachedAccountStore = null;
+const resolveAccountPayload = async (payload) => {
+  if (!payload) return null;
+  if (typeof payload === 'string') {
+    try {
+      cachedAccountStore = cachedAccountStore || new database();
+      const record = await cachedAccountStore.readData('accounts', payload);
+      return record || null;
+    } catch (error) {
+      logger?.error?.(
+        `[accountSelect] Failed to read account ${payload}`,
+        error
+      );
+      return null;
+    }
+  }
+  return payload;
+};
 
 async function setBackground() {
   const body = document.body;
@@ -90,14 +111,26 @@ async function addAccount(data) {
 }
 
 async function accountSelect(data) {
-  let account = document.getElementById(`${data.ID}`);
-  let activeAccount = document.querySelector('.account-select');
+  const accountData = await resolveAccountPayload(data);
+  if (!accountData || !accountData.ID) return;
 
+  const accountElement = document.getElementById(`${accountData.ID}`);
+  if (!accountElement) return;
+
+  const activeAccount = document.querySelector('.account-select');
   if (activeAccount) activeAccount.classList.toggle('account-select');
-  account.classList.add('account-select');
-  if (data?.profile?.skins[0]?.base64) headplayer(data.profile.skins[0].base64);
+  accountElement.classList.add('account-select');
 
-  document.querySelector('.player-head-name').textContent = data.name;
+  if (accountData?.profile?.skins?.[0]?.base64) {
+    await headplayer(accountData.profile.skins[0].base64);
+  }
+
+  const headNameElement = document.querySelector('.player-head-name');
+  if (headNameElement && accountData?.name) {
+    headNameElement.textContent = accountData.name;
+  }
+
+  presence.setPlayerName(accountData?.name || null);
 }
 
 async function headplayer(skinBase64) {
@@ -505,5 +538,7 @@ export {
   slider as Slider,
   pkg as pkg,
   setStatus as setStatus,
-  setStatusTarget as setStatusTarget
+  setStatusTarget as setStatusTarget,
+  rpc as rpc,
+  presence as presence
 };
