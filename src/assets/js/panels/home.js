@@ -11,12 +11,63 @@ import {
   setStatus,
   setStatusTarget,
   pkg,
-  popup
+  popup,
+  presence
 } from '../utils.js';
 
 const { Launch } = require('minecraft-java-core');
 const { ipcRenderer } = require('electron');
 const { Buffer } = require('buffer');
+const fs = require('fs');
+const path = require('path');
+
+(() => {
+  try {
+    const moduleEntry = require.resolve('minecraft-java-core');
+    const buildDir = path.dirname(moduleEntry);
+    const loaderEntry = path.join(buildDir, 'Minecraft-Loader', 'index.js');
+    const Loader = require(loaderEntry)?.default;
+    if (!Loader || Loader.__voxelitePatched) return;
+
+    Loader.__voxelitePatched = true;
+    const originalForge = Loader.prototype.forge;
+    if (typeof originalForge !== 'function') return;
+
+    Loader.prototype.forge = async function patchedForge(LoaderData) {
+      const nativeCpSync = typeof fs.cpSync === 'function' ? fs.cpSync : null;
+      if (!nativeCpSync) {
+        return originalForge.call(this, LoaderData);
+      }
+
+      const shouldIgnoreCopyError = (error, destination) => {
+        if (!error || process.platform !== 'win32') return false;
+        if (!error.message?.includes('The operation completed successfully')) {
+          return false;
+        }
+        return destination && fs.existsSync(destination);
+      };
+
+      fs.cpSync = function patchedCpSync(src, dest, options) {
+        try {
+          return nativeCpSync.call(fs, src, dest, options);
+        } catch (error) {
+          if (shouldIgnoreCopyError(error, dest)) {
+            return dest;
+          }
+          throw error;
+        }
+      };
+
+      try {
+        return await originalForge.call(this, LoaderData);
+      } finally {
+        fs.cpSync = nativeCpSync;
+      }
+    };
+  } catch (error) {
+    console.error('[voxelite-launcher] Failed to patch forge loader', error);
+  }
+})();
 
 class Home {
   static id = 'home';
@@ -207,6 +258,8 @@ class Home {
       await setStatus(null);
     }
 
+    this.updatePresenceContext(auth?.name, selectedInstanceConfig?.name);
+
     instancePopup.addEventListener('click', async (e) => {
       let configClient = await this.db.readData('configClient');
 
@@ -228,6 +281,12 @@ class Home {
         if (options) {
           setStatusTarget(options.name);
           await setStatus(options.status, options.name);
+          const latestAccount =
+            (await this.db.readData(
+              'accounts',
+              configClient.account_selected
+            )) || auth;
+          this.updatePresenceContext(latestAccount?.name, options?.name);
         }
       }
     });
@@ -821,6 +880,11 @@ class Home {
       'Diciembre'
     ];
     return { year: year, month: allMonth[month - 1], day: day };
+  }
+
+  updatePresenceContext(playerName, instanceName) {
+    presence.setPlayerName(playerName || null);
+    presence.setInstanceName(instanceName || null);
   }
 }
 

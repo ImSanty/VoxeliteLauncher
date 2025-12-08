@@ -12,7 +12,8 @@ import {
   setStatus,
   setStatusTarget,
   popup,
-  appdata
+  appdata,
+  presence
 } from '../utils.js';
 const { ipcRenderer, shell } = require('electron');
 const os = require('os');
@@ -152,6 +153,7 @@ class Settings {
         }
       }
     }
+    presence.setInstanceName(configClient?.instance_selct || null);
     return configClient;
   }
 
