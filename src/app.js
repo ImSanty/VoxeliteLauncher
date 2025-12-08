@@ -3,7 +3,7 @@
  * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 
-const { app, ipcMain, nativeTheme } = require('electron');
+const { app, ipcMain } = require('electron');
 const { Microsoft } = require('minecraft-java-core');
 const { autoUpdater } = require('electron-updater');
 
@@ -191,12 +191,6 @@ ipcMain.handle('console-window-initial-state', () => ({
 ipcMain.handle('Microsoft-window', async (_event, clientId) =>
   new Microsoft(clientId).getAuth()
 );
-
-ipcMain.handle('is-dark-theme', (_event, theme) => {
-  if (theme === 'dark') return true;
-  if (theme === 'light') return false;
-  return nativeTheme.shouldUseDarkColors;
-});
 
 app.on('window-all-closed', () => {
   app.quit();
