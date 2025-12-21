@@ -21,7 +21,8 @@ const { Buffer } = require('buffer');
 const fs = require('fs');
 const path = require('path');
 
-// Voxelite patch: mitigate minecraft-java-core Forge installer issues on Windows.
+// Voxelite patch (temporary): mitigate minecraft-java-core Forge installer issues on Windows until upstream can be fixed.
+// NOTE: We cannot modify the third-party dependency directly, so this shim stays here until the vendor ships a permanent fix.
 (() => {
   try {
     const moduleEntry = require.resolve('minecraft-java-core');
