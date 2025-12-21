@@ -82,6 +82,12 @@ async function changePanel(id) {
   let active = document.querySelector(`.active`);
   if (active) active.classList.toggle('active');
   panel.classList.add('active');
+
+  const hasPresence = presence && typeof presence.setPage === 'function';
+  if (hasPresence) {
+    const pageLabel = id === 'home' || id === 'settings' ? id : null;
+    presence.setPage(pageLabel);
+  }
 }
 
 async function appdata() {

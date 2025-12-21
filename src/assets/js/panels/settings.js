@@ -347,6 +347,35 @@ class Settings {
       }
     });
 
+    const rpcBox = document.querySelector('.rpc-box');
+    const rpcButtons = rpcBox?.querySelectorAll('.rpc-btn');
+    let rpcEnabled = configClient?.launcher_config?.discordPresenceEnabled;
+    if (typeof rpcEnabled !== 'boolean') rpcEnabled = true;
+
+    const setActiveRpc = (enabled) => {
+      rpcButtons?.forEach((btn) => {
+        btn.classList.toggle(
+          'active-console',
+          String(enabled) === btn.dataset.enabled
+        );
+      });
+    };
+
+    setActiveRpc(rpcEnabled);
+
+    rpcBox?.addEventListener('click', async (e) => {
+      const target = e.target.closest('.rpc-btn');
+      if (!target) return;
+      const nextEnabled = target.dataset.enabled === 'true';
+      if (nextEnabled === rpcEnabled) return;
+      rpcEnabled = nextEnabled;
+      setActiveRpc(rpcEnabled);
+      let configClient = await this.db.readData('configClient');
+      configClient.launcher_config.discordPresenceEnabled = rpcEnabled;
+      await this.db.updateData('configClient', configClient);
+      presence.setEnabled(rpcEnabled);
+    });
+
     let closeBox = document.querySelector('.close-box');
     let closeLauncher =
       configClient?.launcher_config?.closeLauncher || 'close-launcher';
