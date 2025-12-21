@@ -21,6 +21,7 @@ const { Buffer } = require('buffer');
 const fs = require('fs');
 const path = require('path');
 
+// Voxelite patch: mitigate minecraft-java-core Forge installer issues on Windows.
 (() => {
   try {
     const moduleEntry = require.resolve('minecraft-java-core');
@@ -38,6 +39,54 @@ const path = require('path');
       if (!nativeCpSync) {
         return originalForge.call(this, LoaderData);
       }
+
+      const ensureForgeJarIntegrity = (forgeVersion) => {
+        try {
+          const versionId = forgeVersion?.id;
+          const minecraftJar = this?.options?.loader?.config?.minecraftJar;
+          if (!versionId || !minecraftJar || !fs.existsSync(minecraftJar)) {
+            return;
+          }
+
+          const destinationDir = path.resolve(
+            this.options.path,
+            'versions',
+            versionId
+          );
+          const destinationFile = path.join(destinationDir, `${versionId}.jar`);
+
+          const destinationExists = fs.existsSync(destinationFile);
+          const destinationSize = destinationExists
+            ? fs.statSync(destinationFile).size
+            : 0;
+
+          if (destinationExists && destinationSize > 0) {
+            return;
+          }
+
+          fs.mkdirSync(destinationDir, { recursive: true });
+          try {
+            fs.copyFileSync(minecraftJar, destinationFile);
+            const copiedSize = fs.statSync(destinationFile).size;
+            if (!copiedSize) {
+              throw new Error('Empty Forge jar after fallback copy');
+            }
+            console.info(
+              '[voxelite-launcher] Applied fallback Forge jar copy after cpSync failure'
+            );
+          } catch (copyError) {
+            console.warn(
+              '[voxelite-launcher] Fallback Forge jar copy failed',
+              copyError
+            );
+          }
+        } catch (integrityError) {
+          console.warn(
+            '[voxelite-launcher] Failed to validate Forge jar integrity',
+            integrityError
+          );
+        }
+      };
 
       const shouldIgnoreCopyError = (error, destination) => {
         if (!error || process.platform !== 'win32') return false;
@@ -59,7 +108,9 @@ const path = require('path');
       };
 
       try {
-        return await originalForge.call(this, LoaderData);
+        const forgeVersion = await originalForge.call(this, LoaderData);
+        ensureForgeJarIntegrity(forgeVersion);
+        return forgeVersion;
       } finally {
         fs.cpSync = nativeCpSync;
       }
