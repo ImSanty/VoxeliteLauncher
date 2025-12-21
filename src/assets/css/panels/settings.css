@@ -540,7 +540,8 @@
 
 
 .close-box,
-.console-box {
+.console-box,
+.rpc-box {
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -549,7 +550,8 @@
 }
 
 .close-btn,
-.console-btn {
+.console-btn,
+.rpc-btn {
     font-size: 1rem;
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     flex: 1 1 0;
@@ -567,7 +569,8 @@
 }
 
 .active-close,
-.active-console {
+.active-console,
+.active-rpc {
     background: var(--element-color);
 }
 
@@ -588,6 +591,7 @@
     .theme-btn:hover,
     .close-btn:hover,
     .console-btn:hover,
+    .rpc-btn:hover,
     .credit-item:hover {
         transform: translateY(-4px);
         box-shadow: 0 22px 46px rgba(0, 0, 0, 0.55);
@@ -609,6 +613,7 @@
 .theme-btn:active,
 .close-btn:active,
 .console-btn:active,
+.rpc-btn:active,
 .credit-item:active {
     transform: translateY(2px) scale(0.96);
     box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
@@ -628,6 +633,8 @@
 .max-files-btn:focus-visible,
 .theme-btn:focus-visible,
 .close-btn:focus-visible,
+.console-btn:focus-visible,
+.rpc-btn:focus-visible,
 .credit-item:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.55), 0 24px 48px rgba(0, 0, 0, 0.55);
@@ -649,7 +656,9 @@
     .size-btn,
     .max-files-btn,
     .theme-btn,
-    .close-btn {
+    .close-btn,
+    .console-btn,
+    .rpc-btn {
         transition: none;
     }
 
@@ -662,6 +671,8 @@
     .max-files-btn:hover,
     .theme-btn:hover,
     .close-btn:hover,
+    .console-btn:hover,
+    .rpc-btn:hover,
     .nav-settings-btn:active,
     .nav-box #save:active,
     .account:active,
@@ -670,7 +681,9 @@
     .size-btn:active,
     .max-files-btn:active,
     .theme-btn:active,
-    .close-btn:active {
+    .close-btn:active,
+    .console-btn:active,
+    .rpc-btn:active {
         transform: none;
         box-shadow: none;
         filter: none;
