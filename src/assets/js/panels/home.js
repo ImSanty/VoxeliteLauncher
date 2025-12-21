@@ -71,10 +71,23 @@ const path = require('path');
 
 class Home {
   static id = 'home';
+
+  constructor() {
+    this.newsPollTimer = null;
+    this.lastNewsSignature = null;
+    this.newsPollInterval = 60000;
+    this.newsLoading = false;
+  }
   async init(config) {
     this.config = config;
     this.db = new database();
-    this.news();
+    this.stopNewsPolling();
+    const configClient = await this.db.readData('configClient');
+    const rpcEnabled = configClient?.launcher_config?.discordPresenceEnabled;
+    presence.setEnabled(rpcEnabled !== false);
+    presence.setPage('home');
+    await this.news();
+    this.startNewsPolling();
     this.instancesSelect();
     this.bindAccountShortcut();
     document
@@ -110,38 +123,28 @@ class Home {
     accountTab.classList.add('active-container-settings');
   }
 
-  async news() {
-    let newsElement = document.querySelector('.news-list');
-    let news = await config
-      .getNews()
-      .then((res) => res)
-      .catch((err) => false);
-    if (news) {
-      if (!news.length) {
+  buildNewsSignature(news) {
+    if (!Array.isArray(news)) return 'invalid';
+    return news
+      .map((item) => {
+        const title = item?.title || '';
+        const published = item?.publish_date || '';
+        const content = item?.content || '';
+        return `${published}|${title}|${content}`;
+      })
+      .join('||');
+  }
+
+  renderNewsList(target, news) {
+    if (!target) return;
+    target.innerHTML = '';
+
+    if (Array.isArray(news) && news.length) {
+      for (let News of news) {
+        let date = this.getdate(News.publish_date);
         let blockNews = document.createElement('div');
         blockNews.classList.add('news-block');
         blockNews.innerHTML = `
-                      <div class="news-header">
-                          <div class="header-text">
-                              <div class="title">No se encontraron novedades.</div>
-                          </div>
-                          <div class="date">
-                              <div class="day">1</div>
-                              <div class="month">Month</div>
-                          </div>
-                      </div>
-                      <div class="news-content">
-                          <div class="bbWrapper">
-                              <p>Podes ver todas las novedades del server aca.</p>
-                          </div>
-                      </div>`;
-        newsElement.appendChild(blockNews);
-      } else {
-        for (let News of news) {
-          let date = this.getdate(News.publish_date);
-          let blockNews = document.createElement('div');
-          blockNews.classList.add('news-block');
-          blockNews.innerHTML = `
                           <div class="news-header">
                               <div class="header-text">
                                   <div class="title">${News.title}</div>
@@ -159,29 +162,90 @@ class Home {
                                   }</span></p>
                               </div>
                           </div>`;
-          newsElement.appendChild(blockNews);
-        }
+        target.appendChild(blockNews);
       }
-    } else {
-      let blockNews = document.createElement('div');
-      blockNews.classList.add('news-block');
-      blockNews.innerHTML = `
-                  <div class="news-header">
+      return;
+    }
+
+    let blockNews = document.createElement('div');
+    blockNews.classList.add('news-block');
+    blockNews.innerHTML = news
+      ? `
+                      <div class="news-header">
                           <div class="header-text">
-                              <div class="title">Error.</div>
+                              <div class="title">No se encontraron novedades.</div>
                           </div>
                           <div class="date">
                               <div class="day">1</div>
-                              <div class="month">Enero</div>
+                              <div class="month">Month</div>
                           </div>
                       </div>
                       <div class="news-content">
                           <div class="bbWrapper">
-                              <p>No se pudo contactar con el servidor.</br>Por favor verifique la configuracion :(</p>
+                              <p>Podes ver todas las novedades del server aca.</p>
                           </div>
-                      </div>`;
-      newsElement.appendChild(blockNews);
+                      </div>`
+      : `
+              <div class="news-header">
+                  <div class="header-text">
+                    <div class="title">Error.</div>
+                  </div>
+                  <div class="date">
+                    <div class="day">1</div>
+                    <div class="month">Enero</div>
+                  </div>
+                </div>
+                <div class="news-content">
+                  <div class="bbWrapper">
+                    <p>No se pudo contactar con el servidor.</br>Por favor verifique la configuracion :(</p>
+                  </div>
+                </div>`;
+    target.appendChild(blockNews);
+  }
+
+  async news() {
+    if (this.newsLoading) return;
+    this.newsLoading = true;
+    try {
+      const newsElement = document.querySelector('.news-list');
+      if (!newsElement) {
+        return;
+      }
+
+      let news = await config
+        .getNews()
+        .then((res) => res)
+        .catch(() => false);
+
+      const normalizedNews = Array.isArray(news)
+        ? news
+        : news && typeof news === 'object'
+        ? [news]
+        : [];
+
+      const signature = this.buildNewsSignature(normalizedNews);
+      if (signature === this.lastNewsSignature && news !== false) {
+        return;
+      }
+
+      this.lastNewsSignature = signature;
+      this.renderNewsList(newsElement, news === false ? false : normalizedNews);
+    } finally {
+      this.newsLoading = false;
     }
+  }
+
+  startNewsPolling() {
+    if (this.newsPollTimer) return;
+    this.newsPollTimer = setInterval(() => {
+      this.news();
+    }, this.newsPollInterval);
+  }
+
+  stopNewsPolling() {
+    if (!this.newsPollTimer) return;
+    clearInterval(this.newsPollTimer);
+    this.newsPollTimer = null;
   }
 
   async instancesSelect() {
@@ -783,6 +847,7 @@ class Home {
       progressBar.classList.remove('progress-bar-active');
       if (!keepLauncherVisible) {
         ipcRenderer.send('main-window-hide');
+        presence.setSuspended(true);
       }
       new logger('Minecraft', '#36b030');
       ipcRenderer.send('main-window-progress-reset');
@@ -800,6 +865,7 @@ class Home {
       if (configClient.launcher_config.closeLauncher == 'close-launcher') {
         ipcRenderer.send('main-window-show');
       }
+      presence.setSuspended(false);
       ipcRenderer.send('main-window-progress-reset');
       infoStartingBOX.style.display = 'none';
       playInstanceBTN.style.display = 'flex';
@@ -837,6 +903,7 @@ class Home {
       if (configClient.launcher_config.closeLauncher == 'close-launcher') {
         ipcRenderer.send('main-window-show');
       }
+      presence.setSuspended(false);
       ipcRenderer.send('main-window-progress-reset');
       infoStartingBOX.style.display = 'none';
       playInstanceBTN.style.display = 'flex';
