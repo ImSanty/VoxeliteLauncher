@@ -175,15 +175,19 @@ class Launcher {
             this.config.client_id
           ).refresh(account);
 
-          if (refresh_accounts.error) {
+          if (!refresh_accounts || refresh_accounts.error) {
             await this.db.deleteData('accounts', account_ID);
             if (account_ID == account_selected) {
               configClient.account_selected = null;
               await this.db.updateData('configClient', configClient);
             }
-            console.error(
-              `[Account] ${account.name}: ${refresh_accounts.errorMessage}`
-            );
+            const errMsg =
+              refresh_accounts?.errorMessage ||
+              refresh_accounts?.message ||
+              (refresh_accounts
+                ? JSON.stringify(refresh_accounts)
+                : 'Unknown Error');
+            console.error(`[Account] ${account.name}: ${errMsg}`);
             continue;
           }
 
@@ -205,15 +209,19 @@ class Launcher {
             account
           );
 
-          if (refresh_accounts.error) {
+          if (!refresh_accounts || refresh_accounts.error) {
             this.db.deleteData('accounts', account_ID);
             if (account_ID == account_selected) {
               configClient.account_selected = null;
               this.db.updateData('configClient', configClient);
             }
-            console.error(
-              `[Account] ${account.name}: ${refresh_accounts.message}`
-            );
+            const errMsg =
+              refresh_accounts?.message ||
+              refresh_accounts?.errorMessage ||
+              (refresh_accounts
+                ? JSON.stringify(refresh_accounts)
+                : 'Unknown Error');
+            console.error(`[Account] ${account.name}: ${errMsg}`);
             continue;
           }
 
@@ -243,15 +251,19 @@ class Launcher {
 
           let refresh_accounts = await Mojang.refresh(account);
 
-          if (refresh_accounts.error) {
+          if (!refresh_accounts || refresh_accounts.error) {
             this.db.deleteData('accounts', account_ID);
             if (account_ID == account_selected) {
               configClient.account_selected = null;
               this.db.updateData('configClient', configClient);
             }
-            console.error(
-              `[Account] ${account.name}: ${refresh_accounts.errorMessage}`
-            );
+            const errMsg =
+              refresh_accounts?.errorMessage ||
+              refresh_accounts?.message ||
+              (refresh_accounts
+                ? JSON.stringify(refresh_accounts)
+                : 'Unknown Error');
+            console.error(`[Account] ${account.name}: ${errMsg}`);
             continue;
           }
 
@@ -273,7 +285,7 @@ class Launcher {
       configClient = await this.db.readData('configClient');
       account_selected = configClient ? configClient.account_selected : null;
 
-      if (!account_selected) {
+      if (!account_selected && accounts.length > 0) {
         let uuid = accounts[0].ID;
         if (uuid) {
           configClient.account_selected = uuid;
