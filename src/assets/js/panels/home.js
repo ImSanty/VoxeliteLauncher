@@ -623,8 +623,7 @@ class Home {
     let lastPercent = 0;
     let lastSpeedBps = 0;
     const speedSamples = [];
-    const maxSpeedSamples = 12;
-    let lastEtaSeconds = null;
+    const maxSpeedSamples = 50;
     let currentPhase = 'preparing';
     let preparingTicker = null;
 
@@ -743,7 +742,6 @@ class Home {
         phase: currentPhase,
         percent: lastPercent,
         speedBps: displaySpeed,
-        etaSeconds: currentPhase === 'download' ? lastEtaSeconds : undefined,
         timestamp
       });
       infoStarting.innerHTML = label;
@@ -815,15 +813,6 @@ class Home {
       }
 
       const effectiveSpeed = getEffectiveSpeed();
-      const remainingBytes = size - progress;
-      const derivedEta =
-        effectiveSpeed && effectiveSpeed > 0
-          ? remainingBytes / effectiveSpeed
-          : null;
-
-      if (Number.isFinite(derivedEta) && derivedEta >= 0) {
-        lastEtaSeconds = derivedEta;
-      }
 
       const label = updateLabel();
       devTraceEvent('progress', {
@@ -861,11 +850,6 @@ class Home {
 
     launch.on('estimated', (time) => {
       if (Number.isFinite(time) && time >= 0) {
-        lastEtaSeconds = time;
-        if (currentPhase === 'download') {
-          const label = updateLabel();
-          consoleState({ phase: 'download', label });
-        }
         devTraceEvent('download:eta', { seconds: time });
       }
     });
@@ -1011,7 +995,6 @@ function buildDownloadLabel({
   phase,
   percent = 0,
   speedBps,
-  etaSeconds,
   timestamp = Date.now()
 }) {
   if (phase === 'preparing') {
@@ -1026,14 +1009,9 @@ function buildDownloadLabel({
 
   if (safePhase === 'Descargando') {
     const speedText = formatSpeed(speedBps);
-    const etaText = formatEta(etaSeconds);
 
     if (speedText) {
       extras.push(speedText);
-    }
-
-    if (etaText) {
-      extras.push(etaText);
     }
   }
 
@@ -1059,29 +1037,6 @@ function formatSpeed(bytesPerSecond) {
   return `${value.toFixed(precision)} ${units[unitIndex]}`;
 }
 
-function formatEta(seconds) {
-  if (!Number.isFinite(seconds) || seconds <= 0) {
-    return null;
-  }
-
-  const totalSeconds = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const secs = totalSeconds % 60;
-
-  const parts = [];
-
-  if (hours) {
-    parts.push(`${hours}h`);
-  }
-
-  if (minutes || hours) {
-    parts.push(`${minutes}m`);
-  }
-
-  parts.push(`${secs}s`);
-  return parts.join(' ');
-}
 
 function formatLauncherError(error, lastDownloadEntry) {
   const segments = [];
