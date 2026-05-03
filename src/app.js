@@ -3,7 +3,6 @@
  * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 
-require('punycode/');
 const { app, ipcMain } = require('electron');
 const { Microsoft } = require('./assets/js/minecraft-core/Index.js');
 const { autoUpdater } = require('electron-updater');
