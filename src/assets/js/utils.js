@@ -328,113 +328,100 @@ async function setStatus(opt, displayNameOverride) {
     }
   };
 
+  let isFirstPoll = true;
   const pollStatus = async () => {
     if (!isCurrent()) return;
 
+    // Parallel external fetch
     const externalStatusPromise = ip
-      ? fetchExternalStatusByIp(ip, port)
+      ? fetchExternalStatusByIp(ip, port).catch(() => null)
       : Promise.resolve(null);
 
     const successfulSamples = [];
     const pingSamples = [];
+    let externalStatus = null;
+    let hasUpdatedUI = false;
 
-    for (let attempt = 0; attempt < sampleAttempts; attempt++) {
+    // Helper to calculate and apply state from current partial data
+    const refreshUI = () => {
       if (!isCurrent()) return;
-      const sample = await status
-        .getStatus()
-        .then((res) => res)
-        .catch((error) => ({ error }));
 
+      let currentLocalPing = null;
+      if (pingSamples.length) {
+        const sorted = [...pingSamples].sort((a, b) => a - b);
+        currentLocalPing = sorted[Math.floor(sorted.length / 2)];
+      }
+
+      const currentLocalPlayers = successfulSamples.length > 0
+        ? normalizePlayerCount(successfulSamples[successfulSamples.length - 1])
+        : null;
+
+      const finalPing = choosePing(currentLocalPing, externalStatus?.ping ?? null);
+      const finalPlayers = choosePlayers(currentLocalPlayers, externalStatus?.players ?? null);
+      
+      const iconCandidate = 
+        (externalStatus?.icon) || 
+        (successfulSamples.find(s => s.favicon)?.favicon) ||
+        resolvedExternalIcon || 
+        (lastGoodSnapshot?.icon) || 
+        null;
+
+      if (iconCandidate) resolvedExternalIcon = iconCandidate;
+
+      const hasEvidenceOfLife = (Number.isFinite(currentLocalPing) && currentLocalPing >= 0) || 
+                                (externalStatus && externalStatus.online === true) ||
+                                (Number.isFinite(currentLocalPlayers) && currentLocalPlayers > 0) ||
+                                (externalStatus && Number.isFinite(externalStatus.players) && externalStatus.players > 0);
+      
+      if (hasEvidenceOfLife) {
+        consecutiveFailures = 0;
+        const snapshot = {
+          ping: Math.max(0, Math.round(finalPing * 0.35)),
+          players: finalPlayers,
+          icon: resolvedExternalIcon
+        };
+        lastGoodSnapshot = snapshot;
+        applyOnlineState(snapshot);
+        hasUpdatedUI = true;
+      }
+    };
+
+    // Update UI immediately when external API returns
+    externalStatusPromise.then((status) => {
       if (!isCurrent()) return;
+      externalStatus = status;
+      if (status?.icon) resolvedExternalIcon = status.icon;
+      refreshUI();
+    });
+
+    // Run local pings
+    const currentSampleAttempts = isFirstPoll ? 1 : sampleAttempts;
+    for (let attempt = 0; attempt < currentSampleAttempts; attempt++) {
+      if (!isCurrent()) break;
+
+      const sample = await status.getStatus().catch((error) => ({ error }));
+      if (!isCurrent()) break;
 
       if (sample && !sample.error) {
         successfulSamples.push(sample);
         if (typeof sample.ms === 'number' && sample.ms >= 0) {
           pingSamples.push(sample.ms);
         }
+        // Update UI as soon as we have a local sample
+        refreshUI();
       }
 
-      if (attempt < sampleAttempts - 1) {
-        await sleep(120);
+      if (attempt < currentSampleAttempts - 1) {
+        await sleep(isFirstPoll ? 50 : 120);
       }
     }
 
-    if (!isCurrent()) return;
+    // Final check after all local attempts and external promise
+    externalStatus = await externalStatusPromise;
+    isFirstPoll = false;
+    refreshUI();
 
-    const externalStatus = await externalStatusPromise.catch(() => null);
-    if (externalStatus?.icon && isCurrent()) {
-      resolvedExternalIcon = externalStatus.icon;
-    }
-
-    const hasLocalSuccess = successfulSamples.length > 0;
-    const hasExternalSuccess =
-      !!externalStatus &&
-      (externalStatus.online === true ||
-        Number.isFinite(externalStatus.ping) ||
-        Number.isFinite(externalStatus.players));
-
-    if (hasLocalSuccess || hasExternalSuccess) {
-      consecutiveFailures = 0;
-
-      let localPing = null;
-      if (pingSamples.length) {
-        pingSamples.sort((a, b) => a - b);
-        const medianIndex = Math.floor(pingSamples.length / 2);
-        const selectedPing = pingSamples[medianIndex];
-        if (Number.isFinite(selectedPing)) {
-          localPing = Math.max(0, Math.round(selectedPing));
-        }
-      }
-
-      let primarySample = null;
-      if (hasLocalSuccess) {
-        primarySample = successfulSamples.reduce((best, current) => {
-          if (!best) return current;
-          const currentPlayers = normalizePlayerCount(current);
-          const bestPlayers = normalizePlayerCount(best);
-          if (currentPlayers === bestPlayers) {
-            return current.ms < best.ms ? current : best;
-          }
-          return currentPlayers > bestPlayers ? current : best;
-        }, null);
-      }
-
-      const localPlayers = primarySample
-        ? normalizePlayerCount(primarySample)
-        : null;
-
-      const fallbackIconSample = successfulSamples.find(
-        (sample) => sample && sample.favicon
-      );
-
-      const finalPing = choosePing(localPing, externalStatus?.ping ?? null);
-      const normalizedPing = Math.max(0, Math.round(finalPing * 0.35));
-      const finalPlayers = choosePlayers(
-        localPlayers,
-        externalStatus?.players ?? null
-      );
-
-      const iconCandidate =
-        (externalStatus && externalStatus.icon) ||
-        (primarySample && primarySample.favicon) ||
-        (fallbackIconSample && fallbackIconSample.favicon) ||
-        resolvedExternalIcon ||
-        (lastGoodSnapshot && lastGoodSnapshot.icon) ||
-        null;
-
-      if (iconCandidate) {
-        resolvedExternalIcon = iconCandidate;
-      }
-
-      const snapshot = {
-        ping: normalizedPing,
-        players: finalPlayers,
-        icon: resolvedExternalIcon
-      };
-
-      lastGoodSnapshot = snapshot;
-      applyOnlineState(snapshot);
-    } else {
+    if (!hasUpdatedUI && isCurrent()) {
       consecutiveFailures += 1;
       if (lastGoodSnapshot && consecutiveFailures <= failureTolerance) {
         applyOnlineState(lastGoodSnapshot);
