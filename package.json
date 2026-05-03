@@ -1,7 +1,7 @@
 {
   "name": "voxelite-launcher",
   "productName": "VoxeliteLauncher",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "Voxelite minecraft launcher",
   "main": "src/app.js",
   "author": {
@@ -11,9 +11,9 @@
   },
   "url": "https://api.imsanty.com/v1",
   "scripts": {
-    "start": "cross-env-shell NODE_ENV=dev electron .",
+    "start": "cross-env-shell NODE_ENV=dev electron . --no-deprecation",
     "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
-    "splash": "cross-env-shell NODE_ENV=production DEV_TOOL=open electron .",
+    "splash": "cross-env-shell NODE_ENV=production DEV_TOOL=open electron . --no-deprecation",
     "build": "node build.js --obf=true --build=platform",
     "icon": "node build.js --icon=https://raw.githubusercontent.com/ImSanty/VoxeliteLauncher/dev/src/assets/images/icon.png"
   },
@@ -23,19 +23,19 @@
     "ignore": "**/test"
   },
   "dependencies": {
-    "electron-updater": "^6.1.8",
-    "minecraft-java-core": "^4.2.3",
-    "node-bdd": "^2.0.4",
+    "discord-rpc": "^4.0.1",
+    "electron-updater": "^6.7.3",
     "node-fetch": "^2.7.0",
-    "xml-js": "^1.6.11",
-    "discord-rpc": "^4.0.1"
+    "semver": "^7.7.2",
+    "tslib": "^2.8.1",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@electron/rebuild": "^4.0.1",
-    "cross-env": "^7.0.3",
-    "electron": "^38.3.0",
+    "cross-env": "^10.1.0",
+    "electron": "^41.5.0",
     "electron-builder": "^26.0.12",
-    "javascript-obfuscator": "^5.0.0",
+    "javascript-obfuscator": "^5.1.0",
     "jimp": "^1.6.0",
     "nodemon": "^3.1.11",
     "png2icons": "^2.0.1"
