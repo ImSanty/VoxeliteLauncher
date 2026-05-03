@@ -15,7 +15,7 @@ import {
   presence
 } from '../utils.js';
 
-const { Launch } = require('minecraft-java-core');
+const { Launch } = require('./assets/js/minecraft-core/Index.js');
 const { ipcRenderer } = require('electron');
 const { Buffer } = require('buffer');
 const fs = require('fs');
@@ -25,7 +25,7 @@ const path = require('path');
 // NOTE: We cannot modify the third-party dependency directly, so this shim stays here until the vendor ships a permanent fix.
 (() => {
   try {
-    const moduleEntry = require.resolve('minecraft-java-core');
+    const moduleEntry = require.resolve('./assets/js/minecraft-core/Index.js');
     const buildDir = path.dirname(moduleEntry);
     const loaderEntry = path.join(buildDir, 'Minecraft-Loader', 'index.js');
     const Loader = require(loaderEntry)?.default;

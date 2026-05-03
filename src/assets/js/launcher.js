@@ -19,7 +19,7 @@ import {
   addAccount,
   pkg
 } from './utils.js';
-const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
+const { AZauth, Microsoft, Mojang } = require('./assets/js/minecraft-core/Index.js');
 
 // libs
 const { ipcRenderer } = require('electron');
